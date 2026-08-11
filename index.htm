@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 250px;
+            background-color: #1e293b;
+            color: #fff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h2 {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #38bdf8;
+            text-align: center;
+        }
+
+        .sidebar a {
+            color: #cbd5e1;
+            text-decoration: none;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background-color: #0ea5e9;
+            color: #fff;
+        }
+
+        /* Main Content Styling */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .card h3 {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #0f172a;
+        }
+
+        /* Form and Table Sections */
+        .content-box {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .content-box h3 {
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        button {
+            background-color: #0ea5e9;
+            color: #fff;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #0284c7;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: #475569;
+        }
+
+        .badge {
+            background-color: #dcfce7;
+            color: #166534;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h2>SMS Portal</h2>
+        <a href="#" class="active">Dashboard</a>
+        <a href="#">Students</a>
+        <a href="#">Attendance</a>
+        <a href="#">Grades</a>
+        <a href="#">Settings</a>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Student Management Dashboard</h1>
+        </div>
+
+        <!-- Top Statistics -->
+        <div class="stats-grid">
+            <div class="card">
+                <h3>Total Students</h3>
+                <p>1,245</p>
+            </div>
+            <div class="card">
+                <h3>Active Classes</h3>
+                <p>32</p>
+            </div>
+            <div class="card">
+                <h3>Attendance Today</h3>
+                <p>94%</p>
+            </div>
+        </div>
+
+        <!-- Add Student Form -->
+        <div class="content-box">
+            <h3>Register New Student</h3>
+            <form onsubmit="event.preventDefault();">
+                <div class="form-grid">
+                    <input type="text" placeholder="Full Name" required>
+                    <input type="email" placeholder="Email Address" required>
+                    <select required>
+                        <option value="">Select Grade/Class</option>
+                        <option value="1">Form 1</option>
+                        <option value="2">Form 2</option>
+                        <option value="3">Form 3</option>
+                        <option value="4">Form 4</option>
+                    </select>
+                </div>
+                <button type="submit">Add Student</button>
+            </form>
+        </div>
+
+        <!-- Student List Table -->
+        <div class="content-box">
+            <h3>Recent Students</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Class</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#ST001</td>
+                        <td>Amina Juma</td>
+                        <td>Form 4</td>
+                        <td><span class="badge">Active</span></td>
+                    </tr>
+                    <tr>
+                        <td>#ST002</td>
+                        <td>Baraka John</td>
+                        <td>Form 2</td>
+                        <td><span class="badge">Active</span></td>
+                    </tr>
+                    <tr>
+                        <td>#ST003</td>
+                        <td>Charles Kelvin</td>
+                        <td>Form 3</td>
+                        <td><span class="badge">Active</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>
