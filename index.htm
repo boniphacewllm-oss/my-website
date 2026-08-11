@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="sw">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Management System</title>
-    <!-- Icons Library -->
+    <title>Student Management System (CRUD)</title>
+    <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', 'Segoe UI', sans-serif;
+            font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
         }
 
         body {
@@ -29,11 +29,10 @@
             padding: 24px 16px;
             display: flex;
             flex-direction: column;
-            transition: all 0.3s ease;
         }
 
         .sidebar h2 {
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             margin-bottom: 32px;
             color: #38bdf8;
             display: flex;
@@ -65,18 +64,12 @@
             width: 100%;
         }
 
-        .nav-btn:hover {
-            background-color: #1e293b;
-            color: #f8fafc;
-        }
-
-        .nav-btn.active {
+        .nav-btn:hover, .nav-btn.active {
             background-color: #0284c7;
             color: #ffffff;
-            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
         }
 
-        /* Main Content */
+        /* Main Content Area */
         .main-content {
             flex: 1;
             padding: 32px;
@@ -92,21 +85,6 @@
             color: #0f172a;
         }
 
-        /* Dynamic Pages Container */
-        .page-section {
-            display: none;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        .page-section.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         /* Stats Cards */
         .stats-grid {
             display: grid;
@@ -117,7 +95,7 @@
 
         .card {
             background: #ffffff;
-            padding: 24px;
+            padding: 20px;
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             border: 1px solid #e2e8f0;
@@ -130,7 +108,6 @@
             font-size: 0.85rem;
             color: #64748b;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
             margin-bottom: 6px;
         }
 
@@ -141,7 +118,7 @@
         }
 
         .card-icon {
-            font-size: 2rem;
+            font-size: 1.8rem;
             color: #0284c7;
             background: #e0f2fe;
             padding: 12px;
@@ -158,16 +135,42 @@
             margin-bottom: 32px;
         }
 
-        .content-box h3 {
+        .content-box-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .content-box h3 {
             color: #0f172a;
             font-size: 1.2rem;
+        }
+
+        /* Search Bar */
+        .search-box {
+            position: relative;
+            width: 250px;
+        }
+
+        .search-box input {
+            padding-left: 35px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
         }
 
         /* Form */
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
             margin-bottom: 20px;
         }
@@ -190,7 +193,7 @@
             border-radius: 8px;
             font-size: 0.95rem;
             outline: none;
-            transition: border-color 0.2s;
+            width: 100%;
         }
 
         input:focus, select:focus {
@@ -198,20 +201,43 @@
             box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
         }
 
-        .btn-submit {
-            background-color: #0284c7;
-            color: #ffffff;
+        .btn-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
             padding: 12px 24px;
             border: none;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .btn-submit:hover {
-            background-color: #0369a1;
+        .btn-primary { background-color: #0284c7; color: #fff; }
+        .btn-primary:hover { background-color: #0369a1; }
+
+        .btn-secondary { background-color: #64748b; color: #fff; }
+        .btn-secondary:hover { background-color: #475569; }
+
+        .btn-action {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
         }
+
+        .btn-edit { background-color: #fef08a; color: #854d0e; }
+        .btn-edit:hover { background-color: #fde047; }
+
+        .btn-delete { background-color: #fecaca; color: #991b1b; }
+        .btn-delete:hover { background-color: #fca5a5; }
 
         /* Table */
         .table-responsive {
@@ -245,7 +271,12 @@
             font-weight: 600;
         }
 
-        /* Responsive */
+        .empty-message {
+            text-align: center;
+            padding: 30px;
+            color: #94a3b8;
+        }
+
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; }
@@ -258,214 +289,263 @@
     <div class="sidebar">
         <h2><i class="fa-solid fa-graduation-cap"></i> SMS Portal</h2>
         <nav>
-            <button class="nav-btn active" onclick="switchTab('dashboard')">
-                <i class="fa-solid fa-chart-pie"></i> Dashboard
-            </button>
-            <button class="nav-btn" onclick="switchTab('students')">
-                <i class="fa-solid fa-user-graduate"></i> Students
-            </button>
-            <button class="nav-btn" onclick="switchTab('attendance')">
-                <i class="fa-solid fa-calendar-check"></i> Attendance
-            </button>
-            <button class="nav-btn" onclick="switchTab('grades')">
-                <i class="fa-solid fa-award"></i> Grades
-            </button>
+            <button class="nav-btn active"><i class="fa-solid fa-users"></i> Students (CRUD)</button>
         </nav>
     </div>
 
     <!-- Main Content Area -->
     <div class="main-content">
-        
-        <!-- Dashboard Section -->
-        <div id="dashboard" class="page-section active">
-            <div class="header">
-                <h1>Overview Dashboard</h1>
-            </div>
+        <div class="header">
+            <h1>Student Management System</h1>
+        </div>
 
-            <div class="stats-grid">
-                <div class="card">
-                    <div class="card-info">
-                        <h3>Total Students</h3>
-                        <p id="total-count">3</p>
-                    </div>
-                    <div class="card-icon"><i class="fa-solid fa-users"></i></div>
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="card">
+                <div class="card-info">
+                    <h3>Total Students</h3>
+                    <p id="totalStudents">0</p>
                 </div>
-                <div class="card">
-                    <div class="card-info">
-                        <h3>Active Classes</h3>
-                        <p>4</p>
-                    </div>
-                    <div class="card-icon"><i class="fa-solid fa-school"></i></div>
-                </div>
-                <div class="card">
-                    <div class="card-info">
-                        <h3>Today's Attendance</h3>
-                        <p>96%</p>
-                    </div>
-                    <div class="card-icon"><i class="fa-solid fa-clipboard-user"></i></div>
-                </div>
+                <div class="card-icon"><i class="fa-solid fa-user-graduate"></i></div>
             </div>
-
-            <!-- Quick Add Form -->
-            <div class="content-box">
-                <h3>Register New Student</h3>
-                <form id="studentForm">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Full Name</label>
-                            <input type="text" id="studentName" placeholder="e.g. Hassan Ally" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Email Address</label>
-                            <input type="email" id="studentEmail" placeholder="e.g. hassan@example.com" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Class/Grade</label>
-                            <select id="studentClass" required>
-                                <option value="">Select Class</option>
-                                <option value="Form 1">Form 1</option>
-                                <option value="Form 2">Form 2</option>
-                                <option value="Form 3">Form 3</option>
-                                <option value="Form 4">Form 4</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-submit"><i class="fa-solid fa-plus"></i> Add Student</button>
-                </form>
-            </div>
-
-            <!-- Student List Table -->
-            <div class="content-box">
-                <h3>Registered Students</h3>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Class</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentTableBody">
-                            <tr>
-                                <td>#ST001</td>
-                                <td>Amina Juma</td>
-                                <td>amina@gmail.com</td>
-                                <td>Form 4</td>
-                                <td><span class="badge">Active</span></td>
-                            </tr>
-                            <tr>
-                                <td>#ST002</td>
-                                <td>Baraka John</td>
-                                <td>baraka@gmail.com</td>
-                                <td>Form 2</td>
-                                <td><span class="badge">Active</span></td>
-                            </tr>
-                            <tr>
-                                <td>#ST003</td>
-                                <td>Charles Kelvin</td>
-                                <td>charles@gmail.com</td>
-                                <td>Form 3</td>
-                                <td><span class="badge">Active</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div class="card">
+                <div class="card-info">
+                    <h3>Form 1-2</h3>
+                    <p id="juniorStudents">0</p>
                 </div>
+                <div class="card-icon"><i class="fa-solid fa-book-open"></i></div>
+            </div>
+            <div class="card">
+                <div class="card-info">
+                    <h3>Form 3-4</h3>
+                    <p id="seniorStudents">0</p>
+                </div>
+                <div class="card-icon"><i class="fa-solid fa-award"></i></div>
             </div>
         </div>
 
-        <!-- Students Tab -->
-        <div id="students" class="page-section">
-            <div class="header">
-                <h1>Student Directory</h1>
-            </div>
-            <div class="content-box">
-                <p>Orodha kamili ya wanafunzi wote na maelezo yao ya kina.</p>
-            </div>
+        <!-- Add / Edit Form -->
+        <div class="content-box">
+            <h3 id="formTitle">Register New Student</h3>
+            <form id="studentForm" style="margin-top: 15px;">
+                <!-- Hidden Input for Editing ID -->
+                <input type="hidden" id="studentId">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="fullName" placeholder="e.g. Amina Juma" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="email" placeholder="e.g. amina@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Class / Grade</label>
+                        <select id="studentClass" required>
+                            <option value="">Select Class</option>
+                            <option value="Form 1">Form 1</option>
+                            <option value="Form 2">Form 2</option>
+                            <option value="Form 3">Form 3</option>
+                            <option value="Form 4">Form 4</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="btn-container">
+                    <button type="submit" id="submitBtn" class="btn btn-primary">
+                        <i class="fa-solid fa-plus"></i> Add Student
+                    </button>
+                    <button type="button" id="cancelBtn" class="btn btn-secondary" style="display: none;" onclick="resetForm()">
+                        Cancel Edit
+                    </button>
+                </div>
+            </form>
         </div>
 
-        <!-- Attendance Tab -->
-        <div id="attendance" class="page-section">
-            <div class="header">
-                <h1>Attendance Tracker</h1>
+        <!-- Student Table Section -->
+        <div class="content-box">
+            <div class="content-box-header">
+                <h3>Registered Students Directory</h3>
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchInput" placeholder="Search students..." onkeyup="filterStudents()">
+                </div>
             </div>
-            <div class="content-box">
-                <p>Sehemu ya kuchukulia mahudhurio ya kila siku ya wanafunzi.</p>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Class</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                        <!-- Dynamic Rows injected by JS -->
+                    </tbody>
+                </table>
             </div>
         </div>
-
-        <!-- Grades Tab -->
-        <div id="grades" class="page-section">
-            <div class="header">
-                <h1>Academic Performance</h1>
-            </div>
-            <div class="content-box">
-                <p>Sehemu ya kuweka na kutazama matokeo ya mitihani (Grades & Exams).</p>
-            </div>
-        </div>
-
     </div>
 
-    <!-- JavaScript code for functionality -->
+    <!-- JavaScript CRUD Logic -->
     <script>
-        // Tab Switcher Function
-        function switchTab(tabId) {
-            // Hide all pages
-            document.querySelectorAll('.page-section').forEach(section => {
-                section.classList.remove('active');
-            });
+        // Initial Mock Data if localStorage is empty
+        const initialStudents = [
+            { id: "ST001", name: "Amina Juma", email: "amina@gmail.com", studentClass: "Form 4" },
+            { id: "ST002", name: "Baraka John", email: "baraka@gmail.com", studentClass: "Form 2" },
+            { id: "ST003", name: "Charles Kelvin", email: "charles@gmail.com", studentClass: "Form 3" }
+        ];
 
-            // Remove active style from all menu buttons
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            // Show selected page
-            document.getElementById(tabId).classList.add('active');
-
-            // Set clicked button active
-            event.currentTarget.classList.add('active');
+        // Retrieve students from localStorage or initialize
+        function getStudents() {
+            const stored = localStorage.getItem('sms_students');
+            if (!stored) {
+                localStorage.setItem('sms_students', JSON.stringify(initialStudents));
+                return initialStudents;
+            }
+            return JSON.parse(stored);
         }
 
-        // Add New Student Dynamic Function
-        let studentCount = 3;
-        const studentForm = document.getElementById('studentForm');
-        const studentTableBody = document.getElementById('studentTableBody');
-        const totalCountDisplay = document.getElementById('total-count');
+        // Save updated array to localStorage
+        function saveStudents(students) {
+            localStorage.setItem('sms_students', JSON.stringify(students));
+            renderTable();
+        }
 
-        studentForm.addEventListener('submit', function(e) {
+        // READ: Render Table and Stats
+        function renderTable(studentsToDisplay = null) {
+            const students = studentsToDisplay || getStudents();
+            const tableBody = document.getElementById('studentTableBody');
+            tableBody.innerHTML = '';
+
+            if (students.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="empty-message">No student records found.</td></tr>`;
+            } else {
+                students.forEach((student) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>#${student.id}</td>
+                        <td><strong>${student.name}</strong></td>
+                        <td>${student.email}</td>
+                        <td>${student.studentClass}</td>
+                        <td><span class="badge">Active</span></td>
+                        <td>
+                            <button class="btn-action btn-edit" onclick="editStudent('${student.id}')">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </button>
+                            <button class="btn-action btn-delete" onclick="deleteStudent('${student.id}')">
+                                <i class="fa-solid fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            updateStats();
+        }
+
+        // Update Counter Cards
+        function updateStats() {
+            const allStudents = getStudents();
+            document.getElementById('totalStudents').textContent = allStudents.length;
+
+            const junior = allStudents.filter(s => s.studentClass === 'Form 1' || s.studentClass === 'Form 2').length;
+            const senior = allStudents.filter(s => s.studentClass === 'Form 3' || s.studentClass === 'Form 4').length;
+
+            document.getElementById('juniorStudents').textContent = junior;
+            document.getElementById('seniorStudents').textContent = senior;
+        }
+
+        // CREATE & UPDATE: Form Submission
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // Fetch input values
-            const name = document.getElementById('studentName').value;
-            const email = document.getElementById('studentEmail').value;
+            const studentId = document.getElementById('studentId').value;
+            const name = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
             const studentClass = document.getElementById('studentClass').value;
 
-            studentCount++;
+            let students = getStudents();
 
-            // Create a new table row
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td>#ST00${studentCount}</td>
-                <td>${name}</td>
-                <td>${email}</td>
-                <td>${studentClass}</td>
-                <td><span class="badge">Active</span></td>
-            `;
+            if (studentId) {
+                // UPDATE Existing Student
+                students = students.map(s => {
+                    if (s.id === studentId) {
+                        return { id: studentId, name, email, studentClass };
+                    }
+                    return s;
+                });
+            } else {
+                // CREATE New Student
+                const newId = 'ST' + String(Date.now()).slice(-3); // Unique ID based on timestamp
+                students.push({ id: newId, name, email, studentClass });
+            }
 
-            // Append to table
-            studentTableBody.appendChild(newRow);
-
-            // Update stats counter
-            totalCountDisplay.textContent = studentCount;
-
-            // Reset Form inputs
-            studentForm.reset();
-
-            alert('Mwanafunzi amesajiliwa kikamilifu!');
+            saveStudents(students);
+            resetForm();
         });
+
+        // PREPARE UPDATE: Populate Form for Editing
+        function editStudent(id) {
+            const students = getStudents();
+            const student = students.find(s => s.id === id);
+
+            if (student) {
+                document.getElementById('studentId').value = student.id;
+                document.getElementById('fullName').value = student.name;
+                document.getElementById('email').value = student.email;
+                document.getElementById('studentClass').value = student.studentClass;
+
+                // UI Changes for Editing
+                document.getElementById('formTitle').textContent = `Edit Student (${student.id})`;
+                document.getElementById('submitBtn').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Update Student`;
+                document.getElementById('cancelBtn').style.display = 'inline-flex';
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // DELETE: Remove Student Record
+        function deleteStudent(id) {
+            if (confirm(`Are you sure you want to delete student #${id}?`)) {
+                let students = getStudents();
+                students = students.filter(s => s.id !== id);
+                saveStudents(students);
+                resetForm();
+            }
+        }
+
+        // SEARCH: Live Filter
+        function filterStudents() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const students = getStudents();
+            const filtered = students.filter(s => 
+                s.name.toLowerCase().includes(query) ||
+                s.email.toLowerCase().includes(query) ||
+                s.studentClass.toLowerCase().includes(query) ||
+                s.id.toLowerCase().includes(query)
+            );
+            renderTable(filtered);
+        }
+
+        // Reset Form back to Create mode
+        function resetForm() {
+            document.getElementById('studentForm').reset();
+            document.getElementById('studentId').value = '';
+            document.getElementById('formTitle').textContent = 'Register New Student';
+            document.getElementById('submitBtn').innerHTML = `<i class="fa-solid fa-plus"></i> Add Student`;
+            document.getElementById('cancelBtn').style.display = 'none';
+        }
+
+        // Initial render on page load
+        renderTable();
     </script>
 </body>
 </html>
