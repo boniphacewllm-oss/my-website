@@ -3,391 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Management System</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Mfumo wa Wanafunzi (SMS)</title>
+    <!-- Tailwind CSS kwa ajili ya muonekano bora -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background-color: #f1f5f9; color: #1e293b; min-height: 100vh; }
-        #authScreen { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 20px; }
-        .auth-card { background: #ffffff; padding: 35px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 100%; max-width: 420px; }
-        .auth-header { text-align: center; margin-bottom: 24px; }
-        .auth-header h2 { color: #0f172a; font-size: 1.5rem; margin-bottom: 6px; }
-        .auth-header p { color: #64748b; font-size: 0.88rem; }
-        .auth-tabs { display: flex; background: #f1f5f9; padding: 4px; border-radius: 10px; margin-bottom: 20px; }
-        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; font-weight: 600; color: #64748b; border-radius: 8px; cursor: pointer; }
-        .tab-btn.active { background: #ffffff; color: #0284c7; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .auth-form { display: none; }
-        .auth-form.active { display: block; }
-        .input-group { text-align: left; margin-bottom: 16px; }
-        .input-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: #475569; }
-        .input-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
-        .btn-submit-auth { width: 100%; padding: 12px; background-color: #0284c7; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        #appScreen { display: none; flex-direction: row; min-height: 100vh; }
-        .sidebar { width: 260px; background-color: #0f172a; color: #fff; padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; }
-        .sidebar h2 { font-size: 1.25rem; color: #38bdf8; display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
-        .nav-menu { display: flex; flex-direction: column; gap: 8px; }
-        .nav-btn { background: transparent; border: none; color: #94a3b8; padding: 12px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; }
-        .nav-btn:hover, .nav-btn.active { background-color: #0284c7; color: #ffffff; }
-        .btn-logout { background-color: #ef4444; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .main-content { flex: 1; padding: 32px; overflow-y: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 32px; }
-        .card { background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
-        .card-info h3 { font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
-        .card-info p { font-size: 1.6rem; font-weight: 700; }
-        .card-icon { font-size: 1.6rem; color: #0284c7; background: #e0f2fe; padding: 12px; border-radius: 10px; }
-        .content-section { display: none; }
-        .content-section.active { display: block; }
-        .content-box { background: #ffffff; padding: 28px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 32px; }
-        .content-box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
-        input, select { padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 8px; width: 100%; }
-        .btn-container { display: flex; gap: 10px; }
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-primary { background-color: #0284c7; color: #fff; }
-        .btn-success { background-color: #16a34a; color: #fff; }
-        .btn-secondary { background-color: #64748b; color: #fff; }
-        .btn-action { padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; border: none; cursor: pointer; }
-        .btn-edit { background-color: #fef08a; color: #854d0e; }
-        .btn-delete { background-color: #fecaca; color: #991b1b; }
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th, td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; }
-        th { background-color: #f8fafc; color: #475569; font-size: 0.85rem; }
-        .badge { background-color: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
-        .gender-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; }
-        .gender-m { background-color: #e0f2fe; color: #0369a1; }
-        .gender-f { background-color: #fce7f3; color: #be185d; }
-    </style>
 </head>
-<body>
+<bg class="bg-gray-100 text-gray-800 font-sans min-h-screen">
 
-    <div id="authScreen">
-        <div class="auth-card">
-            <div class="auth-header">
-                <h2><i class="fa-solid fa-graduation-cap"></i> Admin Portal</h2>
-                <p>Ingia au Sajili Akaunti</p>
+    <!-- Navigation Bar -->
+    <nav class="bg-blue-600 text-white p-4 shadow-md">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">Mfumo wa Wanafunzi</h1>
+            <div class="space-x-2">
+                <button onclick="switchView('addStudentView')" class="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded text-sm font-semibold">
+                    + Ongeza Mwanafunzi
+                </button>
+                <button onclick="switchView('viewStudents')" class="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded text-sm font-semibold">
+                    Orodha ya Wanafunzi
+                </button>
             </div>
-            <div class="auth-tabs">
-                <button class="tab-btn active" onclick="switchAuthTab('login')">Ingia</button>
-                <button class="tab-btn" onclick="switchAuthTab('register')">Sajili</button>
-            </div>
-            <form id="loginForm" class="auth-form active">
-                <div class="input-group">
-                    <label>Barua Pepe</label>
-                    <input type="email" id="loginEmail" required>
-                </div>
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" id="loginPassword" required>
-                </div>
-                <button type="submit" class="btn-submit-auth">Ingia Mfumoni</button>
-            </form>
-            <form id="registerForm" class="auth-form">
-                <div class="input-group">
-                    <label>Jina Kamili</label>
-                    <input type="text" id="regName" required>
-                </div>
-                <div class="input-group">
-                    <label>Barua Pepe</label>
-                    <input type="email" id="regEmail" required>
-                </div>
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" id="regPassword" required>
-                </div>
-                <button type="submit" class="btn-submit-auth">Sajili Akaunti</button>
-            </form>
         </div>
-    </div>
+    </nav>
 
-    <div id="appScreen">
-        <div class="sidebar">
-            <div>
-                <h2><i class="fa-solid fa-graduation-cap"></i> SMS Portal</h2>
-                <div class="nav-menu">
-                    <button class="nav-btn active" onclick="switchView('dashboard')"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
-                    <button class="nav-btn" onclick="switchView('addStudent')"><i class="fa-solid fa-user-plus"></i> Add Student</button>
-                    <button class="nav-btn" onclick="switchView('viewStudents')"><i class="fa-solid fa-users"></i> View Students</button>
-                    <button class="nav-btn" onclick="switchView('reports')"><i class="fa-solid fa-file-invoice"></i> Reports</button>
-                </div>
-            </div>
-            <button class="btn-logout" onclick="logout()">Logout</button>
-        </div>
+    <main class="max-w-5xl mx-auto p-6">
+        
+        <!-- SEHEMU YA 1: FOMU YA KUONGEZA / KUREKEBISHA MWANAFUNZI -->
+        <section id="addStudentView" class="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto mb-8">
+            <h2 id="formTitle" class="text-2xl font-bold mb-4 text-gray-700">Sajili Mwanafunzi Mpya</h2>
+            
+            <form id="studentForm" class="space-y-4">
+                <!-- ID iliyofichwa kwa ajili ya Uhariri (Edit) -->
+                <input type="hidden" id="studentId">
 
-        <div class="main-content">
-            <div class="header">
+                <!-- Jina Buled -->
                 <div>
-                    <h1 id="pageTitle">Dashboard ya Mfumo</h1>
-                    <span style="font-size:0.9rem; color:#64748b;">Karibu, <strong id="currentAdminName">User</strong></span>
+                    <label for="fullName" class="block text-sm font-medium text-gray-700">Jina Kamili</label>
+                    <input type="text" id="fullName" required placeholder="Mf. Juma Hamisi"
+                           class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
-                <span style="font-size:0.9rem; color:#64748b;">DB Status: <strong id="dbStatus" style="color:#d97706;">Connecting...</strong></span>
-            </div>
 
-            <div class="stats-grid">
-                <div class="card">
-                    <div class="card-info">
-                        <h3>Wanafunzi Wote</h3>
-                        <p id="totalStudents">0</p>
-                    </div>
-                    <div class="card-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                <!-- Jinsia -->
+                <div>
+                    <label for="gender" class="block text-sm font-medium text-gray-700">Jinsia</label>
+                    <select id="gender" required class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="">-- Chagua Jinsia --</option>
+                        <option value="Mvulana">Mvulana</option>
+                        <option value="Msichana">Msichana</option>
+                    </select>
                 </div>
-                <div class="card">
-                    <div class="card-info">
-                        <h3>Wanaume (M)</h3>
-                        <p id="maleStudents">0</p>
-                    </div>
-                    <div class="card-icon"><i class="fa-solid fa-mars"></i></div>
-                </div>
-                <div class="card">
-                    <div class="card-info">
-                        <h3>Wanawake (F)</h3>
-                        <p id="femaleStudents">0</p>
-                    </div>
-                    <div class="card-icon"><i class="fa-solid fa-venus"></i></div>
-                </div>
-            </div>
 
-            <div id="dashboardSection" class="content-section active">
-                <div class="content-box">
-                    <h3>Muhtasari wa Mfumo</h3>
-                    <p style="margin-top:10px; color:#64748b;">Bonyeza "Add Student" ili kuongeza mwanafunzi mpya.</p>
+                <!-- Barua Pepe (Email) -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Barua Pepe (Email)</label>
+                    <input type="email" id="email" required placeholder="mwanafunzi@example.com"
+                           class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
-            </div>
 
-            <div id="addStudentSection" class="content-section">
-                <div class="content-box">
-                    <h3 id="formTitle">Sajili Mwanafunzi Mpya</h3>
-                    <form id="studentForm" style="margin-top: 15px;">
-                        <input type="hidden" id="studentId">
-                        <div class="form-grid">
-                            <input type="text" id="fullName" placeholder="Jina Kamili" required>
-                            <select id="gender" required>
-                                <option value="">Chagua Jinsia</option>
-                                <option value="Mwanaume">Mwanaume</option>
-                                <option value="Mwanamke">Mwanamke</option>
-                            </select>
-                            <input type="email" id="email" placeholder="Barua Pepe" required>
-                            <select id="studentClass" required>
-                                <option value="">Chagua Darasa</option>
-                                <option value="Form 1">Form 1</option>
-                                <option value="Form 2">Form 2</option>
-                                <option value="Form 3">Form 3</option>
-                                <option value="Form 4">Form 4</option>
-                            </select>
-                        </div>
-                        <div class="btn-container">
-                            <button type="submit" id="submitBtn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Hifadhi Mwanafunzi</button>
-                            <button type="button" id="cancelBtn" class="btn btn-secondary" style="display: none;" onclick="resetForm()">Ghairi</button>
-                        </div>
-                    </form>
+                <!-- Darasa -->
+                <div>
+                    <label for="studentClass" class="block text-sm font-medium text-gray-700">Darasa</label>
+                    <select id="studentClass" required class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="">-- Chagua Darasa --</option>
+                        <option value="Form 1">Form 1</option>
+                        <option value="Form 2">Form 2</option>
+                        <option value="Form 3">Form 3</option>
+                        <option value="Form 4">Form 4</option>
+                        <option value="Form 5">Form 5</option>
+                        <option value="Form 6">Form 6</option>
+                    </select>
                 </div>
-            </div>
 
-            <div id="viewStudentsSection" class="content-section">
-                <div class="content-box">
-                    <div class="content-box-header">
-                        <h3>Orodha ya Wanafunzi</h3>
-                        <input type="text" id="searchInput" placeholder="Tafuta..." onkeyup="filterStudents()" style="width:250px;">
-                    </div>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Jina</th>
-                                    <th>Jinsia</th>
-                                    <th>Barua Pepe</th>
-                                    <th>Darasa</th>
-                                    <th>Status</th>
-                                    <th>Kitendo</th>
-                                </tr>
-                            </thead>
-                            <tbody id="studentTableBody"></tbody>
-                        </table>
-                    </div>
+                <!-- Vifungo vya Fomu -->
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" onclick="resetForm()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md">
+                        Safisha Fomu
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md">
+                        Hifadhi Mwanafunzi
+                    </button>
                 </div>
-            </div>
+            </form>
+        </section>
 
-            <div id="reportsSection" class="content-section">
-                <div class="content-box">
-                    <div class="content-box-header">
-                        <h3>Ripoti na Pakua Data</h3>
-                        <button class="btn btn-success" onclick="exportToCSV()"><i class="fa-solid fa-file-excel"></i> Pakua CSV</button>
-                    </div>
-                </div>
+        <!-- SEHEMU YA 2: ORODHA YA WANAFUNZI -->
+        <section id="viewStudents" class="bg-white p-6 rounded-lg shadow-md hidden">
+            <h2 class="text-2xl font-bold mb-4 text-gray-700">Orodha ya Wanafunzi Waliosajiliwa</h2>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 border-b border-gray-200 text-gray-600 uppercase text-xs">
+                            <th class="p-3">ID</th>
+                            <th class="p-3">Jina Kamili</th>
+                            <th class="p-3">Jinsia</th>
+                            <th class="p-3">Email</th>
+                            <th class="p-3">Darasa</th>
+                            <th class="p-3 text-center">Vitendo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                        <!-- Data za Wanafunzi zitaingia hapa kupitia JavaScript -->
+                    </tbody>
+                </table>
             </div>
+        </section>
 
-        </div>
-    </div>
+    </main>
 
     <script>
-        const SUPABASE_URL = "https://qcexgzkilhmdstzjsodt.supabase.co"; 
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjZXhnemtpbGhtZHN0empzb2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1MDY5ODMsImV4cCI6MjEwMjA4Mjk4M30.g-qoy7pT12qtlwfXNbC88GkANit4sBpCBqSKpUzZoOI"; 
+        // --- CONFIGURATION YA SUPABASE ---
+        const SUPABASE_URL = "WEKA_SUPABASE_URL_YAKO_HAPA";
+        const SUPABASE_KEY = "WEKA_SUPABASE_ANON_KEY_YAKO_HAPA";
         
         let supabaseClient = null;
-        if (window.supabase) {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            document.getElementById('dbStatus').textContent = "Connected";
-            document.getElementById('dbStatus').style.color = "#16a34a";
+        if (SUPABASE_URL !== "WEKA_SUPABASE_URL_YAKO_HAPA") {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
 
-        function switchView(viewName) {
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+        // --- HELPER FUNCTIONS ---
+        
+        // SWITCH VIEWS
+        function switchView(viewId) {
+            document.getElementById('addStudentView').classList.add('hidden');
+            document.getElementById('viewStudents').classList.add('hidden');
+            document.getElementById(viewId).classList.remove('hidden');
+        }
 
-            if(viewName === 'dashboard') {
-                document.querySelectorAll('.nav-btn')[0].classList.add('active');
-                document.getElementById('dashboardSection').classList.add('active');
-            } else if(viewName === 'addStudent') {
-                document.querySelectorAll('.nav-btn')[1].classList.add('active');
-                document.getElementById('addStudentSection').classList.add('active');
-            } else if(viewName === 'viewStudents') {
-                document.querySelectorAll('.nav-btn')[2].classList.add('active');
-                document.getElementById('viewStudentsSection').classList.add('active');
-            } else if(viewName === 'reports') {
-                document.querySelectorAll('.nav-btn')[3].classList.add('active');
-                document.getElementById('reportsSection').classList.add('active');
+        // RESET FORM
+        function resetForm() {
+            document.getElementById('studentForm').reset();
+            document.getElementById('studentId').value = '';
+            document.getElementById('formTitle').innerText = 'Sajili Mwanafunzi Mpya';
+        }
+
+        // GENERATE AUTOMATIC ID (Mf. STD-001)
+        function generateNextFormattedId(students) {
+            const nextNum = students.length + 1;
+            return `STD-${String(nextNum).padStart(3, '0')}`;
+        }
+
+        // FETCH STUDENTS
+        async function getStudents() {
+            if (supabaseClient) {
+                const { data, error } = await supabaseClient.from('students').select('*');
+                if (!error && data) return data;
             }
+            return JSON.parse(localStorage.getItem('sms_students') || '[]');
         }
 
-        function switchAuthTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
-
-            if (tab === 'login') {
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
-                document.getElementById('loginForm').classList.add('active');
-            } else {
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
-                document.getElementById('registerForm').classList.add('active');
-            }
-        }
-
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('regName').value.trim();
-            const email = document.getElementById('regEmail').value.trim().toLowerCase();
-            const password = document.getElementById('regPassword').value;
-
-            let admins = JSON.parse(localStorage.getItem('sms_admins') || '[]');
-            if (admins.find(a => a.email === email)) {
-                alert("Barua pepe hii imeshasajiliwa!");
+        // RENDER STUDENTS TABLE
+        async function loadAndRenderStudents() {
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center">Inapakia data...</td></tr>';
+            
+            const students = await getStudents();
+            
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">Hakuna wanafunzi waliosajiliwa.</td></tr>';
                 return;
             }
 
-            admins.push({ name, email, password });
-            localStorage.setItem('sms_admins', JSON.stringify(admins));
-            alert("Akaunti imetengenezwa!");
-            switchAuthTab('login');
-            document.getElementById('loginEmail').value = email;
-            document.getElementById('registerForm').reset();
-        });
-
-        const authScreen = document.getElementById('authScreen');
-        const appScreen = document.getElementById('appScreen');
-
-        if (sessionStorage.getItem('isAdminLoggedIn') === 'true') {
-            showDashboard(sessionStorage.getItem('currentAdminName') || 'Admin');
+            tbody.innerHTML = students.map(s => `
+                <tr class="border-b border-gray-200 hover:bg-gray-50">
+                    <td class="p-3 font-semibold text-blue-600">${s.id}</td>
+                    <td class="p-3">${s.name || ''}</td>
+                    <td class="p-3">${s.gender || ''}</td>
+                    <td class="p-3">${s.email || ''}</td>
+                    <td class="p-3">${s.studentclass || s.studentClass || s.student_class || ''}</td>
+                    <td class="p-3 text-center space-x-2">
+                        <button onclick="editStudent('${s.id}')" class="text-blue-600 hover:underline">Hariri</button>
+                    </td>
+                </tr>
+            `).join('');
         }
 
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-            const password = document.getElementById('loginPassword').value;
-
-            let admins = JSON.parse(localStorage.getItem('sms_admins') || '[]');
-            const matchedAdmin = admins.find(a => a.email === email && a.password === password);
-            const isDefaultAdmin = (email === "admin@school.com" && password === "admin123");
-
-            if (matchedAdmin || isDefaultAdmin) {
-                const adminName = matchedAdmin ? matchedAdmin.name : "System Admin";
-                sessionStorage.setItem('isAdminLoggedIn', 'true');
-                sessionStorage.setItem('currentAdminName', adminName);
-                showDashboard(adminName);
-            } else {
-                alert("Password au Email siyo sahihi!");
-            }
-        });
-
-        async function showDashboard(name) {
-            authScreen.style.display = 'none';
-            appScreen.style.display = 'flex';
-            document.getElementById('currentAdminName').textContent = name;
-            await loadAndRenderStudents();
-        }
-
-        function logout() {
-            sessionStorage.removeItem('isAdminLoggedIn');
-            sessionStorage.removeItem('currentAdminName');
-            authScreen.style.display = 'flex';
-            appScreen.style.display = 'none';
-        }
-
-        function generateNextFormattedId(students) {
-            if (!students || students.length === 0) return "001";
-            let numbers = students.map(s => parseInt(s.id, 10)).filter(n => !isNaN(n));
-            let maxNum = numbers.length > 0 ? Math.max(...numbers) : 0;
-            return String(maxNum + 1).padStart(3, '0');
-        }
-
-        async function getStudents() {
-            if (supabaseClient) {
-                try {
-                    const { data, error } = await supabaseClient.from('students').select('*');
-                    if (!error && data) {
-                        localStorage.setItem('sms_students', JSON.stringify(data));
-                        return data;
-                    }
-                } catch (e) { 
-                    console.error("Error loading:", e); 
-                }
-            }
-            const stored = localStorage.getItem('sms_students');
-            return stored ? JSON.parse(stored) : [];
-        }
-
-        async function loadAndRenderStudents() {
+        // EDIT STUDENT
+        async function editStudent(id) {
             const students = await getStudents();
-            renderTable(students);
-        }
-
-        function renderTable(students = []) {
-            const tableBody = document.getElementById('studentTableBody');
-            tableBody.innerHTML = '';
-
-            if (!students || students.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px;">Hakuna wanafunzi waliosajiliwa.</td></tr>`;
-            } else {
-                students.forEach(s => {
-                    const genderClass = s.gender === 'Mwanaume' ? 'gender-m' : 'gender-f';
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><strong>${s.id}</strong></td>
-                        <td><strong>${s.name}</strong></td>
-                        <td><span class="gender-badge ${genderClass}">${s.gender || 'N/A'}</span></td>
-                        <td>${s.email}</td>
-                        <td>${s.studentClass || s.student_class || ''}</td>
-                        <td><span class="badge">Active</span></td>
-                        <td>
-                            <button class="btn-action btn-edit" onclick="editStudent('${s.id}')"><i class="fa-solid fa-pen"></i> Badili</button>
-                            <button class="btn-action btn-delete" onclick="deleteStudent('${s.id}')"><i class="fa-solid fa-trash"></i> Futa</button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
+            const student = students.find(s => s.id === id);
+            
+            if (student) {
+                document.getElementById('studentId').value = student.id;
+                document.getElementById('fullName').value = student.name || '';
+                document.getElementById('gender').value = student.gender || '';
+                document.getElementById('email').value = student.email || '';
+                document.getElementById('studentClass').value = student.studentclass || student.studentClass || student.student_class || '';
+                
+                document.getElementById('formTitle').innerText = `Rekebisha Mwanafunzi #${student.id}`;
+                switchView('addStudentView');
             }
-            updateStats(students);
         }
 
-        function updateStats(students = []) {
-            document.getElementById('totalStudents').textContent = students.length;
-            document.getElementById('maleStudents').textContent = students.filter(s => s.gender === 'Mwanaume').length;
-            document.getElementById('femaleStudents').textContent = students.filter(s => s.gender === 'Mwanamke').length;
-        }
-
-        /* FUNCTION YA ADD / EDIT ILIYOBORESHWA */
+        // --- EVENT LISTENER YA FORM SUBMISSION ---
         document.getElementById('studentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -400,31 +208,31 @@
             let students = await getStudents();
             const finalId = idInput || generateNextFormattedId(students);
 
-            // Tuma data zenye majina yote mawili ya column kuzuia makosa ya Mismatch
+            // Payload inayotuma majina yote matatu ya column ili kuzuia Supabase Not-Null Errors
             let studentPayload = { 
                 id: finalId, 
                 name: name, 
                 gender: gender, 
                 email: email, 
-                studentClass: studentClass,
+                studentclass: studentClass, 
+                studentClass: studentClass, 
                 student_class: studentClass 
             };
 
             if (supabaseClient) {
-                // Tuma Supabase
                 const { error } = await supabaseClient.from('students').upsert([studentPayload]);
                 
                 if (error) {
-                    alert("Kosa kutoka Supabase: " + error.message);
+                    alert("Hitilafu ya Supabase: " + error.message);
                     console.error("Supabase Add Error:", error);
-                    return; // Isiendelee kama kuna error Supabase
+                    return;
                 }
             }
 
-            // Hifadhi pia LocalStorage kama Backup
+            // Backup kwenye LocalStorage
             let localData = JSON.parse(localStorage.getItem('sms_students') || '[]');
             const existingIndex = localData.findIndex(s => s.id === finalId);
-            if(existingIndex > -1) {
+            if (existingIndex > -1) {
                 localData[existingIndex] = studentPayload;
             } else {
                 localData.push(studentPayload);
@@ -437,77 +245,10 @@
             switchView('viewStudents');
         });
 
-        async function editStudent(id) {
-            const students = await getStudents();
-            const s = students.find(item => String(item.id) === String(id));
-            if (s) {
-                document.getElementById('studentId').value = s.id;
-                document.getElementById('fullName').value = s.name;
-                document.getElementById('gender').value = s.gender || '';
-                document.getElementById('email').value = s.email;
-                document.getElementById('studentClass').value = s.studentClass || s.student_class || '';
-                document.getElementById('formTitle').textContent = `Badilisha Taarifa (#${s.id})`;
-                document.getElementById('cancelBtn').style.display = 'inline-flex';
-                switchView('addStudent');
-            }
-        }
-
-        async function deleteStudent(id) {
-            if (confirm(`Unataka kumfuta mwanafunzi #${id}?`)) {
-                if (supabaseClient) {
-                    const { error } = await supabaseClient.from('students').delete().eq('id', String(id));
-                    if (error) {
-                        alert("Error wakati wa kufuta: " + error.message);
-                        return;
-                    }
-                }
-                
-                let localData = JSON.parse(localStorage.getItem('sms_students') || '[]');
-                localData = localData.filter(s => String(s.id) !== String(id));
-                localStorage.setItem('sms_students', JSON.stringify(localData));
-
-                alert(`Mwanafunzi #${id} amefutwa!`);
-                await loadAndRenderStudents();
-            }
-        }
-
-        function resetForm() {
-            document.getElementById('studentForm').reset();
-            document.getElementById('studentId').value = '';
-            document.getElementById('formTitle').textContent = 'Sajili Mwanafunzi Mpya';
-            document.getElementById('cancelBtn').style.display = 'none';
-        }
-
-        async function filterStudents() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const students = await getStudents();
-            const filtered = students.filter(s => 
-                s.id.toLowerCase().includes(query) ||
-                s.name.toLowerCase().includes(query) || 
-                (s.gender && s.gender.toLowerCase().includes(query)) ||
-                s.email.toLowerCase().includes(query)
-            );
-            renderTable(filtered);
-        }
-
-        async function exportToCSV() {
-            const students = await getStudents();
-            if (students.length === 0) {
-                alert("Hakuna data!");
-                return;
-            }
-
-            let csv = "ID,Jina,Jinsia,Barua Pepe,Darasa\n";
-            students.forEach(s => {
-                csv += `"${s.id}","${s.name}","${s.gender || ''}","${s.email}","${s.studentClass || s.student_class || ''}"\n`;
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = "Ripoti_Wanafunzi.csv";
-            link.click();
-        }
+        // Pakia data mwanzo unapofungua ukurasa
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAndRenderStudents();
+        });
     </script>
 </body>
 </html>
