@@ -551,7 +551,7 @@
             document.getElementById('dbStatus').style.color = "#16a34a";
         }
 
-        /* TAB / VIEW SWITCHER */
+        /* SWITCH VIEWS */
         function switchView(viewName) {
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
@@ -593,6 +593,7 @@
             }
         }
 
+        /* AUTHENTICATION */
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('regName').value.trim();
@@ -643,8 +644,7 @@
             authScreen.style.display = 'none';
             appScreen.style.display = 'flex';
             document.getElementById('currentAdminName').textContent = name;
-            const students = await getStudents();
-            renderTable(students);
+            await loadAndRenderStudents();
         }
 
         function logout() {
@@ -663,28 +663,28 @@
             return String(nextNum).padStart(3, '0');
         }
 
+        /* FETCH STUDENTS FROM SUPABASE */
         async function getStudents() {
             if (supabaseClient) {
                 try {
                     const { data, error } = await supabaseClient.from('students').select('*');
-                    if (!error && data) return data;
-                } catch (e) { console.error("Supabase Error:", e); }
+                    if (error) {
+                        console.error("Supabase Select Error:", error);
+                    } else if (data) {
+                        localStorage.setItem('sms_students', JSON.stringify(data));
+                        return data;
+                    }
+                } catch (e) { 
+                    console.error("Fetch Exception:", e); 
+                }
             }
             const stored = localStorage.getItem('sms_students');
             return stored ? JSON.parse(stored) : [];
         }
 
-        async function saveStudents(students, newStudent = null, isDeleteId = null) {
-            localStorage.setItem('sms_students', JSON.stringify(students));
+        async function loadAndRenderStudents() {
+            const students = await getStudents();
             renderTable(students);
-
-            if (supabaseClient) {
-                if (newStudent) {
-                    await supabaseClient.from('students').upsert([newStudent]);
-                } else if (isDeleteId) {
-                    await supabaseClient.from('students').delete().eq('id', isDeleteId);
-                }
-            }
         }
 
         function renderTable(students = []) {
@@ -721,6 +721,7 @@
             document.getElementById('femaleStudents').textContent = students.filter(s => s.gender === 'Mwanamke').length;
         }
 
+        /* CREATE / UPDATE (ADD & EDIT) */
         document.getElementById('studentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const idInput = document.getElementById('studentId').value;
@@ -730,44 +731,52 @@
             const studentClass = document.getElementById('studentClass').value;
 
             let students = await getStudents();
-            
-            // Format ID kama 001, 002 kama ni mpya
             const finalId = idInput || generateNextFormattedId(students);
+            let studentPayload = { id: finalId, name, gender, email, studentClass };
 
-            let updatedStudent = { id: finalId, name, gender, email, studentClass };
-
-            if (idInput) {
-                students = students.map(s => s.id === idInput ? updatedStudent : s);
-            } else {
-                students.push(updatedStudent);
+            if (supabaseClient) {
+                const { error } = await supabaseClient.from('students').upsert([studentPayload]);
+                if (error) {
+                    alert("Hitilafu ya Supabase: " + error.message);
+                    console.error("Upsert Error:", error);
+                    return;
+                }
             }
 
-            await saveStudents(students, updatedStudent);
             resetForm();
             alert(`Mwanafunzi #${finalId} amehifadhiwa kikamilifu!`);
+            await loadAndRenderStudents();
             switchView('viewStudents');
         });
 
+        /* EDIT */
         async function editStudent(id) {
             const students = await getStudents();
-            const s = students.find(item => item.id === id);
+            const s = students.find(item => item.id === String(id));
             if (s) {
                 document.getElementById('studentId').value = s.id;
                 document.getElementById('fullName').value = s.name;
                 document.getElementById('gender').value = s.gender || '';
                 document.getElementById('email').value = s.email;
                 document.getElementById('studentClass').value = s.studentClass;
-                document.getElementById('formTitle').textContent = `Badilisha Taarifa (${s.id})`;
+                document.getElementById('formTitle').textContent = `Badilisha Taarifa (#${s.id})`;
                 document.getElementById('cancelBtn').style.display = 'inline-flex';
                 switchView('addStudent');
             }
         }
 
+        /* DELETE */
         async function deleteStudent(id) {
             if (confirm(`Je, una uhakika unataka kumfuta mwanafunzi #${id}?`)) {
-                let students = await getStudents();
-                students = students.filter(s => s.id !== id);
-                await saveStudents(students, null, id);
+                if (supabaseClient) {
+                    const { error } = await supabaseClient.from('students').delete().eq('id', String(id));
+                    if (error) {
+                        alert("Hitilafu wakati wa kufuta: " + error.message);
+                        return;
+                    }
+                }
+                alert(`Mwanafunzi #${id} amefutwa!`);
+                await loadAndRenderStudents();
             }
         }
 
