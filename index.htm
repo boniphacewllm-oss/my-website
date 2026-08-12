@@ -22,34 +22,74 @@
             min-height: 100vh;
         }
 
-        /* LOGIN PAGE STYLING */
-        #loginScreen {
+        /* LOGIN / REGISTER PAGE STYLING */
+        #authScreen {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 20px;
         }
 
-        .login-card {
+        .auth-card {
             background: #ffffff;
-            padding: 40px;
+            padding: 35px;
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
+        }
+
+        .auth-header {
             text-align: center;
-        }
-
-        .login-card h2 {
-            margin-bottom: 8px;
-            color: #0f172a;
-        }
-
-        .login-card p {
-            color: #64748b;
-            font-size: 0.9rem;
             margin-bottom: 24px;
+        }
+
+        .auth-header h2 {
+            color: #0f172a;
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+        }
+
+        .auth-header p {
+            color: #64748b;
+            font-size: 0.88rem;
+        }
+
+        /* Toggle Tabs for Login / Register */
+        .auth-tabs {
+            display: flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            color: #64748b;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: #0284c7;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
         }
 
         .input-group {
@@ -71,9 +111,15 @@
             border: 1px solid #cbd5e1;
             border-radius: 8px;
             outline: none;
+            font-size: 0.95rem;
         }
 
-        .btn-login {
+        .input-group input:focus {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+        }
+
+        .btn-submit-auth {
             width: 100%;
             padding: 12px;
             background-color: #0284c7;
@@ -84,15 +130,16 @@
             font-size: 1rem;
             cursor: pointer;
             transition: background 0.2s;
+            margin-top: 8px;
         }
 
-        .btn-login:hover {
+        .btn-submit-auth:hover {
             background-color: #0369a1;
         }
 
         /* MAIN APP DASHBOARD STYLING */
         #appScreen {
-            display: none; /* Inajificha mpaka Admin aingie */
+            display: none;
             flex-direction: row;
             min-height: 100vh;
         }
@@ -302,21 +349,48 @@
 </head>
 <body>
 
-    <!-- 1. ADMIN LOGIN SCREEN -->
-    <div id="loginScreen">
-        <div class="login-card">
-            <h2><i class="fa-solid fa-graduation-cap"></i> Admin Portal</h2>
-            <p>Ingia kusimamia mfumo wa wanafunzi</p>
-            <form id="loginForm">
+    <!-- 1. AUTHENTICATION SCREEN (LOGIN & REGISTER) -->
+    <div id="authScreen">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2><i class="fa-solid fa-graduation-cap"></i> Admin Portal</h2>
+                <p>Ingia au Sajili Akaunti ya Admin</p>
+            </div>
+
+            <!-- Tab Buttons -->
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchAuthTab('login')">Ingia (Login)</button>
+                <button class="tab-btn" onclick="switchAuthTab('register')">Sajili (Register)</button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="loginForm" class="auth-form active">
                 <div class="input-group">
                     <label>Barua Pepe (Email)</label>
-                    <input type="email" id="loginEmail" placeholder="admin@school.com" required>
+                    <input type="email" id="loginEmail" placeholder="e.g. admin@school.com" required>
                 </div>
                 <div class="input-group">
                     <label>Neno la Siri (Password)</label>
                     <input type="password" id="loginPassword" placeholder="••••••••" required>
                 </div>
-                <button type="submit" class="btn-login"><i class="fa-solid fa-right-to-bracket"></i> Ingia (Login)</button>
+                <button type="submit" class="btn-submit-auth"><i class="fa-solid fa-right-to-bracket"></i> Ingia Kwenye Mfumo</button>
+            </form>
+
+            <!-- REGISTER ADMIN FORM -->
+            <form id="registerForm" class="auth-form">
+                <div class="input-group">
+                    <label>Jina Kamili</label>
+                    <input type="text" id="regName" placeholder="e.g. Boniphace" required>
+                </div>
+                <div class="input-group">
+                    <label>Barua Pepe (Email)</label>
+                    <input type="email" id="regEmail" placeholder="e.g. admin@school.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Weka Password Mpya</label>
+                    <input type="password" id="regPassword" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-submit-auth"><i class="fa-solid fa-user-plus"></i> Tengeneza Akaunti Mpya</button>
             </form>
         </div>
     </div>
@@ -333,8 +407,11 @@
 
         <div class="main-content">
             <div class="header">
-                <h1>Dashboard ya Mfumo</h1>
-                <span style="font-size:0.9rem; color:#64748b;">Hali ya Database: <strong id="dbStatus" style="color:#16a34a;">LocalStorage / Online Sync</strong></span>
+                <div>
+                    <h1>Dashboard ya Mfumo</h1>
+                    <span style="font-size:0.9rem; color:#64748b;">Karibu, Admin: <strong id="currentAdminName">User</strong></span>
+                </div>
+                <span style="font-size:0.9rem; color:#64748b;">Database: <strong id="dbStatus" style="color:#16a34a;">LocalStorage / Sync Active</strong></span>
             </div>
 
             <!-- Stats Overview -->
@@ -391,7 +468,6 @@
                     <h3>Orodha ya Wanafunzi</h3>
                     <div style="display:flex; gap:10px;">
                         <input type="text" id="searchInput" placeholder="Tafuta mwanafunzi..." onkeyup="filterStudents()" style="width:200px;">
-                        <!-- DOWNLOAD REPORT BUTTON -->
                         <button class="btn btn-success" onclick="exportToCSV()"><i class="fa-solid fa-file-excel"></i> Pakua Ripoti (CSV)</button>
                     </div>
                 </div>
@@ -417,53 +493,88 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        /* --- SUPABASE DATABASE SETUP (Cloud DB) --- */
-        // Weka URL na ANON KEY kutoka akaunti yako ya Supabase (supabase.com) hapa:
-        const SUPABASE_URL = ""; 
-        const SUPABASE_ANON_KEY = ""; 
-        let supabase = null;
+        /* --- AUTH TAB SWITCHER --- */
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
 
-        if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            document.getElementById('dbStatus').textContent = "Supabase Cloud DB (Online)";
+            if (tab === 'login') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('registerForm').classList.add('active');
+            }
         }
 
-        /* --- 1. LOGIN SYSTEM --- */
-        const loginScreen = document.getElementById('loginScreen');
+        /* --- ADMIN REGISTER LOGIC --- */
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim().toLowerCase();
+            const password = document.getElementById('regPassword').value;
+
+            let admins = JSON.parse(localStorage.getItem('sms_admins') || '[]');
+            
+            // Check if email exists
+            if (admins.find(a => a.email === email)) {
+                alert("Barua pepe hii tayari imeshasajiliwa! Tumia email nyingine au ingia (login).");
+                return;
+            }
+
+            admins.push({ name, email, password });
+            localStorage.setItem('sms_admins', JSON.stringify(admins));
+
+            alert("Akaunti ya Admin imetengenezwa kikamilifu! Sasa unaweza kuingia.");
+            switchAuthTab('login');
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('registerForm').reset();
+        });
+
+        /* --- ADMIN LOGIN LOGIC --- */
+        const authScreen = document.getElementById('authScreen');
         const appScreen = document.getElementById('appScreen');
 
-        // Angalia kama Admin alikuwa tayari ameingia
         if (sessionStorage.getItem('isAdminLoggedIn') === 'true') {
-            showDashboard();
+            showDashboard(sessionStorage.getItem('currentAdminName') || 'Admin');
         }
 
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
             const password = document.getElementById('loginPassword').value;
 
-            // Simple Admin Verification (Inaweza kuunganishwa na Supabase Auth pia)
-            if (email === "admin@school.com" && password === "admin123") {
+            let admins = JSON.parse(localStorage.getItem('sms_admins') || '[]');
+
+            // Check registered admins OR default backup admin (admin@school.com / admin123)
+            const matchedAdmin = admins.find(a => a.email === email && a.password === password);
+            const isDefaultAdmin = (email === "admin@school.com" && password === "admin123");
+
+            if (matchedAdmin || isDefaultAdmin) {
+                const adminName = matchedAdmin ? matchedAdmin.name : "System Admin";
                 sessionStorage.setItem('isAdminLoggedIn', 'true');
-                showDashboard();
+                sessionStorage.setItem('currentAdminName', adminName);
+                showDashboard(adminName);
             } else {
-                alert("Email au Password siyo sahihi! (Tumia: admin@school.com / admin123)");
+                alert("Password au Email siyo sahihi!\n\nIkiwa bado hutasajiliwa, bonyeza tab ya 'Sajili (Register)' ili utengeneze akaunti mpya ya Admin.");
             }
         });
 
-        function showDashboard() {
-            loginScreen.style.display = 'none';
+        function showDashboard(name) {
+            authScreen.style.display = 'none';
             appScreen.style.display = 'flex';
+            document.getElementById('currentAdminName').textContent = name;
             renderTable();
         }
 
         function logout() {
             sessionStorage.removeItem('isAdminLoggedIn');
-            loginScreen.style.display = 'flex';
+            sessionStorage.removeItem('currentAdminName');
+            authScreen.style.display = 'flex';
             appScreen.style.display = 'none';
         }
 
-        /* --- 2. DATA MANAGEMENT (CRUD) --- */
+        /* --- STUDENT CRUD LOGIC --- */
         const initialStudents = [
             { id: "ST001", name: "Amina Juma", email: "amina@gmail.com", studentClass: "Form 4" },
             { id: "ST002", name: "Baraka John", email: "baraka@gmail.com", studentClass: "Form 2" },
@@ -479,13 +590,8 @@
             return JSON.parse(stored);
         }
 
-        async function saveStudents(students) {
+        function saveStudents(students) {
             localStorage.setItem('sms_students', JSON.stringify(students));
-            
-            // Sync na Cloud Database kama ipo configured
-            if (supabase) {
-                await supabase.from('students').upsert(students);
-            }
             renderTable();
         }
 
@@ -579,7 +685,7 @@
             renderTable(filtered);
         }
 
-        /* --- 3. DOWNLOAD REPORT (EXPORT TO CSV) --- */
+        /* --- EXPORT TO CSV --- */
         function exportToCSV() {
             const students = getStudents();
             if (students.length === 0) {
