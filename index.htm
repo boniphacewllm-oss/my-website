@@ -4,413 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Management System</title>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase Cloud DB SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
-        }
-
-        body {
-            background-color: #f1f5f9;
-            color: #1e293b;
-            min-height: 100vh;
-        }
-
-        #authScreen {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            padding: 20px;
-        }
-
-        .auth-card {
-            background: #ffffff;
-            padding: 35px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            width: 100%;
-            max-width: 420px;
-        }
-
-        .auth-header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .auth-header h2 {
-            color: #0f172a;
-            font-size: 1.5rem;
-            margin-bottom: 6px;
-        }
-
-        .auth-header p {
-            color: #64748b;
-            font-size: 0.88rem;
-        }
-
-        .auth-tabs {
-            display: flex;
-            background: #f1f5f9;
-            padding: 4px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            background: transparent;
-            font-weight: 600;
-            color: #64748b;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .tab-btn.active {
-            background: #ffffff;
-            color: #0284c7;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .auth-form {
-            display: none;
-        }
-
-        .auth-form.active {
-            display: block;
-        }
-
-        .input-group {
-            text-align: left;
-            margin-bottom: 16px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #475569;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            outline: none;
-            font-size: 0.95rem;
-        }
-
-        .input-group input:focus {
-            border-color: #0284c7;
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
-        }
-
-        .btn-submit-auth {
-            width: 100%;
-            padding: 12px;
-            background-color: #0284c7;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 8px;
-        }
-
-        .btn-submit-auth:hover {
-            background-color: #0369a1;
-        }
-
-        #appScreen {
-            display: none;
-            flex-direction: row;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 260px;
-            background-color: #0f172a;
-            color: #fff;
-            padding: 24px 16px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .sidebar h2 {
-            font-size: 1.25rem;
-            color: #38bdf8;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        .nav-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .nav-btn {
-            background: transparent;
-            border: none;
-            color: #94a3b8;
-            padding: 12px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.95rem;
-            width: 100%;
-            text-align: left;
-            transition: all 0.2s;
-        }
-
-        .nav-btn:hover, .nav-btn.active {
-            background-color: #0284c7;
-            color: #ffffff;
-        }
-
-        .btn-logout {
-            background-color: #ef4444;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 32px;
-            overflow-y: auto;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 28px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            margin-bottom: 32px;
-        }
-
-        .card {
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .card-info h3 {
-            font-size: 0.8rem;
-            color: #64748b;
-            text-transform: uppercase;
-        }
-
-        .card-info p {
-            font-size: 1.6rem;
-            font-weight: 700;
-        }
-
-        .card-icon {
-            font-size: 1.6rem;
-            color: #0284c7;
-            background: #e0f2fe;
-            padding: 12px;
-            border-radius: 10px;
-        }
-
-        .content-section {
-            display: none;
-        }
-
-        .content-section.active {
-            display: block;
-        }
-
-        .content-box {
-            background: #ffffff;
-            padding: 28px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            margin-bottom: 32px;
-        }
-
-        .content-box-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        input, select {
-            padding: 11px 14px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            width: 100%;
-        }
-
-        .btn-container {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: #f1f5f9; color: #1e293b; min-height: 100vh; }
+        #authScreen { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 20px; }
+        .auth-card { background: #ffffff; padding: 35px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 100%; max-width: 420px; }
+        .auth-header { text-align: center; margin-bottom: 24px; }
+        .auth-header h2 { color: #0f172a; font-size: 1.5rem; margin-bottom: 6px; }
+        .auth-header p { color: #64748b; font-size: 0.88rem; }
+        .auth-tabs { display: flex; background: #f1f5f9; padding: 4px; border-radius: 10px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; font-weight: 600; color: #64748b; border-radius: 8px; cursor: pointer; }
+        .tab-btn.active { background: #ffffff; color: #0284c7; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .auth-form { display: none; }
+        .auth-form.active { display: block; }
+        .input-group { text-align: left; margin-bottom: 16px; }
+        .input-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: #475569; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
+        .btn-submit-auth { width: 100%; padding: 12px; background-color: #0284c7; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        #appScreen { display: none; flex-direction: row; min-height: 100vh; }
+        .sidebar { width: 260px; background-color: #0f172a; color: #fff; padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar h2 { font-size: 1.25rem; color: #38bdf8; display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
+        .nav-menu { display: flex; flex-direction: column; gap: 8px; }
+        .nav-btn { background: transparent; border: none; color: #94a3b8; padding: 12px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; }
+        .nav-btn:hover, .nav-btn.active { background-color: #0284c7; color: #ffffff; }
+        .btn-logout { background-color: #ef4444; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .main-content { flex: 1; padding: 32px; overflow-y: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 32px; }
+        .card { background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
+        .card-info h3 { font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
+        .card-info p { font-size: 1.6rem; font-weight: 700; }
+        .card-icon { font-size: 1.6rem; color: #0284c7; background: #e0f2fe; padding: 12px; border-radius: 10px; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .content-box { background: #ffffff; padding: 28px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 32px; }
+        .content-box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        input, select { padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 8px; width: 100%; }
+        .btn-container { display: flex; gap: 10px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
         .btn-primary { background-color: #0284c7; color: #fff; }
         .btn-success { background-color: #16a34a; color: #fff; }
         .btn-secondary { background-color: #64748b; color: #fff; }
-
-        .btn-action {
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-        }
-
+        .btn-action { padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; border: none; cursor: pointer; }
         .btn-edit { background-color: #fef08a; color: #854d0e; }
         .btn-delete { background-color: #fecaca; color: #991b1b; }
-
         .table-responsive { overflow-x: auto; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th, td {
-            padding: 14px 16px;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        th {
-            background-color: #f8fafc;
-            color: #475569;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-        }
-
-        .badge {
-            background-color: #dcfce7;
-            color: #15803d;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 600;
-        }
-
-        .gender-badge {
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; }
+        th { background-color: #f8fafc; color: #475569; font-size: 0.85rem; }
+        .badge { background-color: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+        .gender-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; }
         .gender-m { background-color: #e0f2fe; color: #0369a1; }
         .gender-f { background-color: #fce7f3; color: #be185d; }
-
-        @media (max-width: 768px) {
-            #appScreen { flex-direction: column; }
-            .sidebar { width: 100%; }
-        }
     </style>
 </head>
 <body>
 
-    <!-- AUTHENTICATION SCREEN -->
     <div id="authScreen">
         <div class="auth-card">
             <div class="auth-header">
                 <h2><i class="fa-solid fa-graduation-cap"></i> Admin Portal</h2>
-                <p>Ingia au Sajili Akaunti ya Admin</p>
+                <p>Ingia au Sajili Akaunti</p>
             </div>
-
             <div class="auth-tabs">
-                <button class="tab-btn active" onclick="switchAuthTab('login')">Ingia (Login)</button>
-                <button class="tab-btn" onclick="switchAuthTab('register')">Sajili (Register)</button>
+                <button class="tab-btn active" onclick="switchAuthTab('login')">Ingia</button>
+                <button class="tab-btn" onclick="switchAuthTab('register')">Sajili</button>
             </div>
-
             <form id="loginForm" class="auth-form active">
                 <div class="input-group">
-                    <label>Barua Pepe (Email)</label>
-                    <input type="email" id="loginEmail" placeholder="e.g. admin@school.com" required>
+                    <label>Barua Pepe</label>
+                    <input type="email" id="loginEmail" required>
                 </div>
                 <div class="input-group">
-                    <label>Neno la Siri (Password)</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required>
                 </div>
-                <button type="submit" class="btn-submit-auth"><i class="fa-solid fa-right-to-bracket"></i> Ingia Kwenye Mfumo</button>
+                <button type="submit" class="btn-submit-auth">Ingia Mfumoni</button>
             </form>
-
             <form id="registerForm" class="auth-form">
                 <div class="input-group">
                     <label>Jina Kamili</label>
-                    <input type="text" id="regName" placeholder="e.g. Boniphace" required>
+                    <input type="text" id="regName" required>
                 </div>
                 <div class="input-group">
-                    <label>Barua Pepe (Email)</label>
-                    <input type="email" id="regEmail" placeholder="e.g. admin@school.com" required>
+                    <label>Barua Pepe</label>
+                    <input type="email" id="regEmail" required>
                 </div>
                 <div class="input-group">
-                    <label>Weka Password Mpya</label>
-                    <input type="password" id="regPassword" placeholder="••••••••" required>
+                    <label>Password</label>
+                    <input type="password" id="regPassword" required>
                 </div>
-                <button type="submit" class="btn-submit-auth"><i class="fa-solid fa-user-plus"></i> Tengeneza Akaunti Mpya</button>
+                <button type="submit" class="btn-submit-auth">Sajili Akaunti</button>
             </form>
         </div>
     </div>
 
-    <!-- MAIN APP SCREEN -->
     <div id="appScreen">
         <div class="sidebar">
             <div>
@@ -422,19 +113,18 @@
                     <button class="nav-btn" onclick="switchView('reports')"><i class="fa-solid fa-file-invoice"></i> Reports</button>
                 </div>
             </div>
-            <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-power-off"></i> Toka (Logout)</button>
+            <button class="btn-logout" onclick="logout()">Logout</button>
         </div>
 
         <div class="main-content">
             <div class="header">
                 <div>
                     <h1 id="pageTitle">Dashboard ya Mfumo</h1>
-                    <span style="font-size:0.9rem; color:#64748b;">Karibu, Admin: <strong id="currentAdminName">User</strong></span>
+                    <span style="font-size:0.9rem; color:#64748b;">Karibu, <strong id="currentAdminName">User</strong></span>
                 </div>
-                <span style="font-size:0.9rem; color:#64748b;">DB Status: <strong id="dbStatus" style="color:#d97706;">Connected</strong></span>
+                <span style="font-size:0.9rem; color:#64748b;">DB Status: <strong id="dbStatus" style="color:#d97706;">Connecting...</strong></span>
             </div>
 
-            <!-- STATS CARDS -->
             <div class="stats-grid">
                 <div class="card">
                     <div class="card-info">
@@ -459,24 +149,20 @@
                 </div>
             </div>
 
-            <!-- SECTIONS -->
-
-            <!-- 1. DASHBOARD VIEW -->
             <div id="dashboardSection" class="content-section active">
                 <div class="content-box">
-                    <h3>Muhtasari wa Haraka</h3>
-                    <p style="margin-top:10px; color:#64748b;">Tumia menyu ya kushoto kusajili mwanafunzi mpya, kuangalia orodha kamili, au kupakua ripoti ya wanafunzi.</p>
+                    <h3>Muhtasari wa Mfumo</h3>
+                    <p style="margin-top:10px; color:#64748b;">Bonyeza "Add Student" ili kuongeza mwanafunzi mpya.</p>
                 </div>
             </div>
 
-            <!-- 2. ADD STUDENT VIEW -->
             <div id="addStudentSection" class="content-section">
                 <div class="content-box">
                     <h3 id="formTitle">Sajili Mwanafunzi Mpya</h3>
                     <form id="studentForm" style="margin-top: 15px;">
                         <input type="hidden" id="studentId">
                         <div class="form-grid">
-                            <input type="text" id="fullName" placeholder="Jina Kamili (e.g. Amina Juma)" required>
+                            <input type="text" id="fullName" placeholder="Jina Kamili" required>
                             <select id="gender" required>
                                 <option value="">Chagua Jinsia</option>
                                 <option value="Mwanaume">Mwanaume</option>
@@ -493,20 +179,18 @@
                         </div>
                         <div class="btn-container">
                             <button type="submit" id="submitBtn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Hifadhi Mwanafunzi</button>
-                            <button type="button" id="cancelBtn" class="btn btn-secondary" style="display: none;" onclick="resetForm()">Ghairi (Cancel)</button>
+                            <button type="button" id="cancelBtn" class="btn btn-secondary" style="display: none;" onclick="resetForm()">Ghairi</button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- 3. VIEW STUDENTS VIEW -->
             <div id="viewStudentsSection" class="content-section">
                 <div class="content-box">
                     <div class="content-box-header">
                         <h3>Orodha ya Wanafunzi</h3>
-                        <input type="text" id="searchInput" placeholder="Tafuta kwa Jina, ID au Darasa..." onkeyup="filterStudents()" style="width:250px;">
+                        <input type="text" id="searchInput" placeholder="Tafuta..." onkeyup="filterStudents()" style="width:250px;">
                     </div>
-
                     <div class="table-responsive">
                         <table>
                             <thead>
@@ -526,14 +210,12 @@
                 </div>
             </div>
 
-            <!-- 4. REPORTS VIEW -->
             <div id="reportsSection" class="content-section">
                 <div class="content-box">
                     <div class="content-box-header">
                         <h3>Ripoti na Pakua Data</h3>
-                        <button class="btn btn-success" onclick="exportToCSV()"><i class="fa-solid fa-file-excel"></i> Pakua Ripoti Yote (CSV/Excel)</button>
+                        <button class="btn btn-success" onclick="exportToCSV()"><i class="fa-solid fa-file-excel"></i> Pakua CSV</button>
                     </div>
-                    <p style="color:#64748b;">Pakua faili la Excel/CSV lililoboreshwa lenye orodha ya wanafunzi wote pamoja na jinsia na madarasa yao.</p>
                 </div>
             </div>
 
@@ -547,23 +229,13 @@
         let supabaseClient = null;
         if (window.supabase) {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            document.getElementById('dbStatus').textContent = "Supabase DB (Connected)";
+            document.getElementById('dbStatus').textContent = "Connected";
             document.getElementById('dbStatus').style.color = "#16a34a";
         }
 
-        /* SWITCH VIEWS */
         function switchView(viewName) {
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
-
-            const titleMap = {
-                'dashboard': 'Dashboard ya Mfumo',
-                'addStudent': 'Sajili Mwanafunzi',
-                'viewStudents': 'Orodha ya Wanafunzi',
-                'reports': 'Ripoti na Takwimu'
-            };
-
-            document.getElementById('pageTitle').textContent = titleMap[viewName];
 
             if(viewName === 'dashboard') {
                 document.querySelectorAll('.nav-btn')[0].classList.add('active');
@@ -593,7 +265,6 @@
             }
         }
 
-        /* AUTHENTICATION */
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('regName').value.trim();
@@ -602,13 +273,13 @@
 
             let admins = JSON.parse(localStorage.getItem('sms_admins') || '[]');
             if (admins.find(a => a.email === email)) {
-                alert("Barua pepe hii tayari imeshasajiliwa!");
+                alert("Barua pepe hii imeshasajiliwa!");
                 return;
             }
 
             admins.push({ name, email, password });
             localStorage.setItem('sms_admins', JSON.stringify(admins));
-            alert("Akaunti ya Admin imetengenezwa kikamilifu!");
+            alert("Akaunti imetengenezwa!");
             switchAuthTab('login');
             document.getElementById('loginEmail').value = email;
             document.getElementById('registerForm').reset();
@@ -654,28 +325,23 @@
             appScreen.style.display = 'none';
         }
 
-        /* AUTO GENERATE ID (FORMAT: 001, 002, 003) */
         function generateNextFormattedId(students) {
             if (!students || students.length === 0) return "001";
             let numbers = students.map(s => parseInt(s.id, 10)).filter(n => !isNaN(n));
             let maxNum = numbers.length > 0 ? Math.max(...numbers) : 0;
-            let nextNum = maxNum + 1;
-            return String(nextNum).padStart(3, '0');
+            return String(maxNum + 1).padStart(3, '0');
         }
 
-        /* FETCH STUDENTS FROM SUPABASE */
         async function getStudents() {
             if (supabaseClient) {
                 try {
                     const { data, error } = await supabaseClient.from('students').select('*');
-                    if (error) {
-                        console.error("Supabase Select Error:", error);
-                    } else if (data) {
+                    if (!error && data) {
                         localStorage.setItem('sms_students', JSON.stringify(data));
                         return data;
                     }
                 } catch (e) { 
-                    console.error("Fetch Exception:", e); 
+                    console.error("Error loading:", e); 
                 }
             }
             const stored = localStorage.getItem('sms_students');
@@ -692,7 +358,7 @@
             tableBody.innerHTML = '';
 
             if (!students || students.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px;">Hakuna kumbukumbu za wanafunzi.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px;">Hakuna wanafunzi waliosajiliwa.</td></tr>`;
             } else {
                 students.forEach(s => {
                     const genderClass = s.gender === 'Mwanaume' ? 'gender-m' : 'gender-f';
@@ -702,7 +368,7 @@
                         <td><strong>${s.name}</strong></td>
                         <td><span class="gender-badge ${genderClass}">${s.gender || 'N/A'}</span></td>
                         <td>${s.email}</td>
-                        <td>${s.studentClass}</td>
+                        <td>${s.studentClass || s.student_class || ''}</td>
                         <td><span class="badge">Active</span></td>
                         <td>
                             <button class="btn-action btn-edit" onclick="editStudent('${s.id}')"><i class="fa-solid fa-pen"></i> Badili</button>
@@ -721,9 +387,10 @@
             document.getElementById('femaleStudents').textContent = students.filter(s => s.gender === 'Mwanamke').length;
         }
 
-        /* CREATE / UPDATE (ADD & EDIT) */
+        /* FUNCTION YA ADD / EDIT ILIYOBORESHWA */
         document.getElementById('studentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
             const idInput = document.getElementById('studentId').value;
             const name = document.getElementById('fullName').value.trim();
             const gender = document.getElementById('gender').value;
@@ -732,49 +399,73 @@
 
             let students = await getStudents();
             const finalId = idInput || generateNextFormattedId(students);
-            let studentPayload = { id: finalId, name, gender, email, studentClass };
+
+            // Tuma data zenye majina yote mawili ya column kuzuia makosa ya Mismatch
+            let studentPayload = { 
+                id: finalId, 
+                name: name, 
+                gender: gender, 
+                email: email, 
+                studentClass: studentClass,
+                student_class: studentClass 
+            };
 
             if (supabaseClient) {
+                // Tuma Supabase
                 const { error } = await supabaseClient.from('students').upsert([studentPayload]);
+                
                 if (error) {
-                    alert("Hitilafu ya Supabase: " + error.message);
-                    console.error("Upsert Error:", error);
-                    return;
+                    alert("Kosa kutoka Supabase: " + error.message);
+                    console.error("Supabase Add Error:", error);
+                    return; // Isiendelee kama kuna error Supabase
                 }
             }
 
+            // Hifadhi pia LocalStorage kama Backup
+            let localData = JSON.parse(localStorage.getItem('sms_students') || '[]');
+            const existingIndex = localData.findIndex(s => s.id === finalId);
+            if(existingIndex > -1) {
+                localData[existingIndex] = studentPayload;
+            } else {
+                localData.push(studentPayload);
+            }
+            localStorage.setItem('sms_students', JSON.stringify(localData));
+
             resetForm();
-            alert(`Mwanafunzi #${finalId} amehifadhiwa kikamilifu!`);
+            alert(`Mwanafunzi #${finalId} amesajiliwa kikamilifu!`);
             await loadAndRenderStudents();
             switchView('viewStudents');
         });
 
-        /* EDIT */
         async function editStudent(id) {
             const students = await getStudents();
-            const s = students.find(item => item.id === String(id));
+            const s = students.find(item => String(item.id) === String(id));
             if (s) {
                 document.getElementById('studentId').value = s.id;
                 document.getElementById('fullName').value = s.name;
                 document.getElementById('gender').value = s.gender || '';
                 document.getElementById('email').value = s.email;
-                document.getElementById('studentClass').value = s.studentClass;
+                document.getElementById('studentClass').value = s.studentClass || s.student_class || '';
                 document.getElementById('formTitle').textContent = `Badilisha Taarifa (#${s.id})`;
                 document.getElementById('cancelBtn').style.display = 'inline-flex';
                 switchView('addStudent');
             }
         }
 
-        /* DELETE */
         async function deleteStudent(id) {
-            if (confirm(`Je, una uhakika unataka kumfuta mwanafunzi #${id}?`)) {
+            if (confirm(`Unataka kumfuta mwanafunzi #${id}?`)) {
                 if (supabaseClient) {
                     const { error } = await supabaseClient.from('students').delete().eq('id', String(id));
                     if (error) {
-                        alert("Hitilafu wakati wa kufuta: " + error.message);
+                        alert("Error wakati wa kufuta: " + error.message);
                         return;
                     }
                 }
+                
+                let localData = JSON.parse(localStorage.getItem('sms_students') || '[]');
+                localData = localData.filter(s => String(s.id) !== String(id));
+                localStorage.setItem('sms_students', JSON.stringify(localData));
+
                 alert(`Mwanafunzi #${id} amefutwa!`);
                 await loadAndRenderStudents();
             }
@@ -794,8 +485,7 @@
                 s.id.toLowerCase().includes(query) ||
                 s.name.toLowerCase().includes(query) || 
                 (s.gender && s.gender.toLowerCase().includes(query)) ||
-                s.email.toLowerCase().includes(query) || 
-                s.studentClass.toLowerCase().includes(query)
+                s.email.toLowerCase().includes(query)
             );
             renderTable(filtered);
         }
@@ -803,23 +493,20 @@
         async function exportToCSV() {
             const students = await getStudents();
             if (students.length === 0) {
-                alert("Hakuna data ya ku-export!");
+                alert("Hakuna data!");
                 return;
             }
 
-            let csv = "ID,Jina,Jinsia,Barua Pepe,Darasa,Hali\n";
+            let csv = "ID,Jina,Jinsia,Barua Pepe,Darasa\n";
             students.forEach(s => {
-                csv += `"${s.id}","${s.name}","${s.gender || ''}","${s.email}","${s.studentClass}","Active"\n`;
+                csv += `"${s.id}","${s.name}","${s.gender || ''}","${s.email}","${s.studentClass || s.student_class || ''}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", "Ripoti_ya_Wanafunzi.csv");
-            document.body.appendChild(link);
+            link.href = URL.createObjectURL(blob);
+            link.download = "Ripoti_Wanafunzi.csv";
             link.click();
-            document.body.removeChild(link);
         }
     </script>
 </body>
