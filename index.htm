@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sw">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Management System (CRUD)</title>
-    <!-- FontAwesome for Icons -->
+    <title>Student Management System</title>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase Cloud DB SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -17,11 +19,84 @@
         body {
             background-color: #f1f5f9;
             color: #1e293b;
-            display: flex;
             min-height: 100vh;
         }
 
-        /* Sidebar Styling */
+        /* LOGIN PAGE STYLING */
+        #loginScreen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        .login-card {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-card h2 {
+            margin-bottom: 8px;
+            color: #0f172a;
+        }
+
+        .login-card p {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #475569;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-login:hover {
+            background-color: #0369a1;
+        }
+
+        /* MAIN APP DASHBOARD STYLING */
+        #appScreen {
+            display: none; /* Inajificha mpaka Admin aingie */
+            flex-direction: row;
+            min-height: 100vh;
+        }
+
         .sidebar {
             width: 260px;
             background-color: #0f172a;
@@ -29,22 +104,16 @@
             padding: 24px 16px;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
         }
 
         .sidebar h2 {
             font-size: 1.25rem;
-            margin-bottom: 32px;
             color: #38bdf8;
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 0 12px;
-        }
-
-        .sidebar nav {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            margin-bottom: 30px;
         }
 
         .nav-btn {
@@ -58,18 +127,29 @@
             align-items: center;
             gap: 12px;
             font-size: 0.95rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            text-align: left;
             width: 100%;
+            text-align: left;
         }
 
-        .nav-btn:hover, .nav-btn.active {
+        .nav-btn.active {
             background-color: #0284c7;
             color: #ffffff;
         }
 
-        /* Main Content Area */
+        .btn-logout {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
         .main-content {
             flex: 1;
             padding: 32px;
@@ -77,18 +157,16 @@
         }
 
         .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 28px;
-        }
-
-        .header h1 {
-            font-size: 1.8rem;
-            color: #0f172a;
         }
 
         /* Stats Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 32px;
         }
@@ -97,7 +175,6 @@
             background: #ffffff;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             border: 1px solid #e2e8f0;
             display: flex;
             align-items: center;
@@ -108,13 +185,11 @@
             font-size: 0.85rem;
             color: #64748b;
             text-transform: uppercase;
-            margin-bottom: 6px;
         }
 
         .card-info p {
             font-size: 1.8rem;
             font-weight: 700;
-            color: #0f172a;
         }
 
         .card-icon {
@@ -130,7 +205,6 @@
             background: #ffffff;
             padding: 28px;
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             border: 1px solid #e2e8f0;
             margin-bottom: 32px;
         }
@@ -144,30 +218,6 @@
             gap: 15px;
         }
 
-        .content-box h3 {
-            color: #0f172a;
-            font-size: 1.2rem;
-        }
-
-        /* Search Bar */
-        .search-box {
-            position: relative;
-            width: 250px;
-        }
-
-        .search-box input {
-            padding-left: 35px;
-        }
-
-        .search-box i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-        }
-
-        /* Form */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -175,30 +225,12 @@
             margin-bottom: 20px;
         }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .form-group label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #475569;
-        }
-
         input, select {
             padding: 11px 14px;
             border: 1px solid #cbd5e1;
             border-radius: 8px;
             font-size: 0.95rem;
-            outline: none;
             width: 100%;
-        }
-
-        input:focus, select:focus {
-            border-color: #0284c7;
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
         }
 
         .btn-container {
@@ -207,22 +239,19 @@
         }
 
         .btn {
-            padding: 12px 24px;
+            padding: 10px 20px;
             border: none;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 8px;
         }
 
         .btn-primary { background-color: #0284c7; color: #fff; }
-        .btn-primary:hover { background-color: #0369a1; }
-
+        .btn-success { background-color: #16a34a; color: #fff; }
         .btn-secondary { background-color: #64748b; color: #fff; }
-        .btn-secondary:hover { background-color: #475569; }
 
         .btn-action {
             padding: 6px 12px;
@@ -230,19 +259,13 @@
             border-radius: 6px;
             border: none;
             cursor: pointer;
-            font-weight: 600;
         }
 
         .btn-edit { background-color: #fef08a; color: #854d0e; }
-        .btn-edit:hover { background-color: #fde047; }
-
         .btn-delete { background-color: #fecaca; color: #991b1b; }
-        .btn-delete:hover { background-color: #fca5a5; }
 
         /* Table */
-        .table-responsive {
-            overflow-x: auto;
-        }
+        .table-responsive { overflow-x: auto; }
 
         table {
             width: 100%;
@@ -271,138 +294,182 @@
             font-weight: 600;
         }
 
-        .empty-message {
-            text-align: center;
-            padding: 30px;
-            color: #94a3b8;
-        }
-
         @media (max-width: 768px) {
-            body { flex-direction: column; }
+            #appScreen { flex-direction: column; }
             .sidebar { width: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar Navigation -->
-    <div class="sidebar">
-        <h2><i class="fa-solid fa-graduation-cap"></i> SMS Portal</h2>
-        <nav>
-            <button class="nav-btn active"><i class="fa-solid fa-users"></i> Students (CRUD)</button>
-        </nav>
+    <!-- 1. ADMIN LOGIN SCREEN -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <h2><i class="fa-solid fa-graduation-cap"></i> Admin Portal</h2>
+            <p>Ingia kusimamia mfumo wa wanafunzi</p>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>Barua Pepe (Email)</label>
+                    <input type="email" id="loginEmail" placeholder="admin@school.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Neno la Siri (Password)</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-login"><i class="fa-solid fa-right-to-bracket"></i> Ingia (Login)</button>
+            </form>
+        </div>
     </div>
 
-    <!-- Main Content Area -->
-    <div class="main-content">
-        <div class="header">
-            <h1>Student Management System</h1>
+    <!-- 2. MAIN DASHBOARD APP SCREEN -->
+    <div id="appScreen">
+        <div class="sidebar">
+            <div>
+                <h2><i class="fa-solid fa-graduation-cap"></i> SMS Portal</h2>
+                <button class="nav-btn active"><i class="fa-solid fa-users"></i> Dashboard & Students</button>
+            </div>
+            <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-power-off"></i> Toka (Logout)</button>
         </div>
 
-        <!-- Stats Overview -->
-        <div class="stats-grid">
-            <div class="card">
-                <div class="card-info">
-                    <h3>Total Students</h3>
-                    <p id="totalStudents">0</p>
-                </div>
-                <div class="card-icon"><i class="fa-solid fa-user-graduate"></i></div>
+        <div class="main-content">
+            <div class="header">
+                <h1>Dashboard ya Mfumo</h1>
+                <span style="font-size:0.9rem; color:#64748b;">Hali ya Database: <strong id="dbStatus" style="color:#16a34a;">LocalStorage / Online Sync</strong></span>
             </div>
-            <div class="card">
-                <div class="card-info">
-                    <h3>Form 1-2</h3>
-                    <p id="juniorStudents">0</p>
-                </div>
-                <div class="card-icon"><i class="fa-solid fa-book-open"></i></div>
-            </div>
-            <div class="card">
-                <div class="card-info">
-                    <h3>Form 3-4</h3>
-                    <p id="seniorStudents">0</p>
-                </div>
-                <div class="card-icon"><i class="fa-solid fa-award"></i></div>
-            </div>
-        </div>
 
-        <!-- Add / Edit Form -->
-        <div class="content-box">
-            <h3 id="formTitle">Register New Student</h3>
-            <form id="studentForm" style="margin-top: 15px;">
-                <!-- Hidden Input for Editing ID -->
-                <input type="hidden" id="studentId">
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="card">
+                    <div class="card-info">
+                        <h3>Jumla ya Wanafunzi</h3>
+                        <p id="totalStudents">0</p>
+                    </div>
+                    <div class="card-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                </div>
+                <div class="card">
+                    <div class="card-info">
+                        <h3>Form 1 & 2</h3>
+                        <p id="juniorStudents">0</p>
+                    </div>
+                    <div class="card-icon"><i class="fa-solid fa-book-open"></i></div>
+                </div>
+                <div class="card">
+                    <div class="card-info">
+                        <h3>Form 3 & 4</h3>
+                        <p id="seniorStudents">0</p>
+                    </div>
+                    <div class="card-icon"><i class="fa-solid fa-award"></i></div>
+                </div>
+            </div>
 
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" id="fullName" placeholder="e.g. Amina Juma" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="email" id="email" placeholder="e.g. amina@example.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Class / Grade</label>
+            <!-- Add / Edit Form -->
+            <div class="content-box">
+                <h3 id="formTitle">Sajili Mwanafunzi Mpya</h3>
+                <form id="studentForm" style="margin-top: 15px;">
+                    <input type="hidden" id="studentId">
+                    <div class="form-grid">
+                        <input type="text" id="fullName" placeholder="Jina Kamili (e.g. Amina Juma)" required>
+                        <input type="email" id="email" placeholder="Barua Pepe" required>
                         <select id="studentClass" required>
-                            <option value="">Select Class</option>
+                            <option value="">Chagua Darasa</option>
                             <option value="Form 1">Form 1</option>
                             <option value="Form 2">Form 2</option>
                             <option value="Form 3">Form 3</option>
                             <option value="Form 4">Form 4</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="btn-container">
-                    <button type="submit" id="submitBtn" class="btn btn-primary">
-                        <i class="fa-solid fa-plus"></i> Add Student
-                    </button>
-                    <button type="button" id="cancelBtn" class="btn btn-secondary" style="display: none;" onclick="resetForm()">
-                        Cancel Edit
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Student Table Section -->
-        <div class="content-box">
-            <div class="content-box-header">
-                <h3>Registered Students Directory</h3>
-                <div class="search-box">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="searchInput" placeholder="Search students..." onkeyup="filterStudents()">
-                </div>
+                    <div class="btn-container">
+                        <button type="submit" id="submitBtn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Hifadhi Mwanafunzi</button>
+                        <button type="button" id="cancelBtn" class="btn btn-secondary" style="display: none;" onclick="resetForm()">Ghairi (Cancel)</button>
+                    </div>
+                </form>
             </div>
 
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Class</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentTableBody">
-                        <!-- Dynamic Rows injected by JS -->
-                    </tbody>
-                </table>
+            <!-- Student Directory & Download Report -->
+            <div class="content-box">
+                <div class="content-box-header">
+                    <h3>Orodha ya Wanafunzi</h3>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="searchInput" placeholder="Tafuta mwanafunzi..." onkeyup="filterStudents()" style="width:200px;">
+                        <!-- DOWNLOAD REPORT BUTTON -->
+                        <button class="btn btn-success" onclick="exportToCSV()"><i class="fa-solid fa-file-excel"></i> Pakua Ripoti (CSV)</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Jina</th>
+                                <th>Barua Pepe</th>
+                                <th>Darasa</th>
+                                <th>Status</th>
+                                <th>Kitendo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript CRUD Logic -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // Initial Mock Data if localStorage is empty
+        /* --- SUPABASE DATABASE SETUP (Cloud DB) --- */
+        // Weka URL na ANON KEY kutoka akaunti yako ya Supabase (supabase.com) hapa:
+        const SUPABASE_URL = ""; 
+        const SUPABASE_ANON_KEY = ""; 
+        let supabase = null;
+
+        if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            document.getElementById('dbStatus').textContent = "Supabase Cloud DB (Online)";
+        }
+
+        /* --- 1. LOGIN SYSTEM --- */
+        const loginScreen = document.getElementById('loginScreen');
+        const appScreen = document.getElementById('appScreen');
+
+        // Angalia kama Admin alikuwa tayari ameingia
+        if (sessionStorage.getItem('isAdminLoggedIn') === 'true') {
+            showDashboard();
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // Simple Admin Verification (Inaweza kuunganishwa na Supabase Auth pia)
+            if (email === "admin@school.com" && password === "admin123") {
+                sessionStorage.setItem('isAdminLoggedIn', 'true');
+                showDashboard();
+            } else {
+                alert("Email au Password siyo sahihi! (Tumia: admin@school.com / admin123)");
+            }
+        });
+
+        function showDashboard() {
+            loginScreen.style.display = 'none';
+            appScreen.style.display = 'flex';
+            renderTable();
+        }
+
+        function logout() {
+            sessionStorage.removeItem('isAdminLoggedIn');
+            loginScreen.style.display = 'flex';
+            appScreen.style.display = 'none';
+        }
+
+        /* --- 2. DATA MANAGEMENT (CRUD) --- */
         const initialStudents = [
             { id: "ST001", name: "Amina Juma", email: "amina@gmail.com", studentClass: "Form 4" },
             { id: "ST002", name: "Baraka John", email: "baraka@gmail.com", studentClass: "Form 2" },
             { id: "ST003", name: "Charles Kelvin", email: "charles@gmail.com", studentClass: "Form 3" }
         ];
 
-        // Retrieve students from localStorage or initialize
         function getStudents() {
             const stored = localStorage.getItem('sms_students');
             if (!stored) {
@@ -412,79 +479,63 @@
             return JSON.parse(stored);
         }
 
-        // Save updated array to localStorage
-        function saveStudents(students) {
+        async function saveStudents(students) {
             localStorage.setItem('sms_students', JSON.stringify(students));
+            
+            // Sync na Cloud Database kama ipo configured
+            if (supabase) {
+                await supabase.from('students').upsert(students);
+            }
             renderTable();
         }
 
-        // READ: Render Table and Stats
-        function renderTable(studentsToDisplay = null) {
-            const students = studentsToDisplay || getStudents();
+        function renderTable(data = null) {
+            const students = data || getStudents();
             const tableBody = document.getElementById('studentTableBody');
             tableBody.innerHTML = '';
 
             if (students.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="6" class="empty-message">No student records found.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px;">Hakuna kumbukumbu za wanafunzi.</td></tr>`;
             } else {
-                students.forEach((student) => {
+                students.forEach(s => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>#${student.id}</td>
-                        <td><strong>${student.name}</strong></td>
-                        <td>${student.email}</td>
-                        <td>${student.studentClass}</td>
+                        <td>#${s.id}</td>
+                        <td><strong>${s.name}</strong></td>
+                        <td>${s.email}</td>
+                        <td>${s.studentClass}</td>
                         <td><span class="badge">Active</span></td>
                         <td>
-                            <button class="btn-action btn-edit" onclick="editStudent('${student.id}')">
-                                <i class="fa-solid fa-pen-to-square"></i> Edit
-                            </button>
-                            <button class="btn-action btn-delete" onclick="deleteStudent('${student.id}')">
-                                <i class="fa-solid fa-trash"></i> Delete
-                            </button>
+                            <button class="btn-action btn-edit" onclick="editStudent('${s.id}')"><i class="fa-solid fa-pen"></i> Badili</button>
+                            <button class="btn-action btn-delete" onclick="deleteStudent('${s.id}')"><i class="fa-solid fa-trash"></i> Futa</button>
                         </td>
                     `;
                     tableBody.appendChild(row);
                 });
             }
-
             updateStats();
         }
 
-        // Update Counter Cards
         function updateStats() {
-            const allStudents = getStudents();
-            document.getElementById('totalStudents').textContent = allStudents.length;
-
-            const junior = allStudents.filter(s => s.studentClass === 'Form 1' || s.studentClass === 'Form 2').length;
-            const senior = allStudents.filter(s => s.studentClass === 'Form 3' || s.studentClass === 'Form 4').length;
-
-            document.getElementById('juniorStudents').textContent = junior;
-            document.getElementById('seniorStudents').textContent = senior;
+            const students = getStudents();
+            document.getElementById('totalStudents').textContent = students.length;
+            document.getElementById('juniorStudents').textContent = students.filter(s => s.studentClass === 'Form 1' || s.studentClass === 'Form 2').length;
+            document.getElementById('seniorStudents').textContent = students.filter(s => s.studentClass === 'Form 3' || s.studentClass === 'Form 4').length;
         }
 
-        // CREATE & UPDATE: Form Submission
         document.getElementById('studentForm').addEventListener('submit', function(e) {
             e.preventDefault();
-
-            const studentId = document.getElementById('studentId').value;
+            const id = document.getElementById('studentId').value;
             const name = document.getElementById('fullName').value.trim();
             const email = document.getElementById('email').value.trim();
             const studentClass = document.getElementById('studentClass').value;
 
             let students = getStudents();
 
-            if (studentId) {
-                // UPDATE Existing Student
-                students = students.map(s => {
-                    if (s.id === studentId) {
-                        return { id: studentId, name, email, studentClass };
-                    }
-                    return s;
-                });
+            if (id) {
+                students = students.map(s => s.id === id ? { id, name, email, studentClass } : s);
             } else {
-                // CREATE New Student
-                const newId = 'ST' + String(Date.now()).slice(-3); // Unique ID based on timestamp
+                const newId = 'ST' + String(Date.now()).slice(-3);
                 students.push({ id: newId, name, email, studentClass });
             }
 
@@ -492,60 +543,64 @@
             resetForm();
         });
 
-        // PREPARE UPDATE: Populate Form for Editing
         function editStudent(id) {
-            const students = getStudents();
-            const student = students.find(s => s.id === id);
-
-            if (student) {
-                document.getElementById('studentId').value = student.id;
-                document.getElementById('fullName').value = student.name;
-                document.getElementById('email').value = student.email;
-                document.getElementById('studentClass').value = student.studentClass;
-
-                // UI Changes for Editing
-                document.getElementById('formTitle').textContent = `Edit Student (${student.id})`;
-                document.getElementById('submitBtn').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Update Student`;
+            const s = getStudents().find(item => item.id === id);
+            if (s) {
+                document.getElementById('studentId').value = s.id;
+                document.getElementById('fullName').value = s.name;
+                document.getElementById('email').value = s.email;
+                document.getElementById('studentClass').value = s.studentClass;
+                document.getElementById('formTitle').textContent = `Badilisha Taarifa (${s.id})`;
                 document.getElementById('cancelBtn').style.display = 'inline-flex';
-                
-                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
 
-        // DELETE: Remove Student Record
         function deleteStudent(id) {
-            if (confirm(`Are you sure you want to delete student #${id}?`)) {
-                let students = getStudents();
-                students = students.filter(s => s.id !== id);
+            if (confirm(`Je, una uhakika unataka kumfuta mwanafunzi #${id}?`)) {
+                let students = getStudents().filter(s => s.id !== id);
                 saveStudents(students);
-                resetForm();
             }
         }
 
-        // SEARCH: Live Filter
+        function resetForm() {
+            document.getElementById('studentForm').reset();
+            document.getElementById('studentId').value = '';
+            document.getElementById('formTitle').textContent = 'Sajili Mwanafunzi Mpya';
+            document.getElementById('cancelBtn').style.display = 'none';
+        }
+
         function filterStudents() {
             const query = document.getElementById('searchInput').value.toLowerCase();
-            const students = getStudents();
-            const filtered = students.filter(s => 
-                s.name.toLowerCase().includes(query) ||
-                s.email.toLowerCase().includes(query) ||
-                s.studentClass.toLowerCase().includes(query) ||
-                s.id.toLowerCase().includes(query)
+            const filtered = getStudents().filter(s => 
+                s.name.toLowerCase().includes(query) || 
+                s.email.toLowerCase().includes(query) || 
+                s.studentClass.toLowerCase().includes(query)
             );
             renderTable(filtered);
         }
 
-        // Reset Form back to Create mode
-        function resetForm() {
-            document.getElementById('studentForm').reset();
-            document.getElementById('studentId').value = '';
-            document.getElementById('formTitle').textContent = 'Register New Student';
-            document.getElementById('submitBtn').innerHTML = `<i class="fa-solid fa-plus"></i> Add Student`;
-            document.getElementById('cancelBtn').style.display = 'none';
-        }
+        /* --- 3. DOWNLOAD REPORT (EXPORT TO CSV) --- */
+        function exportToCSV() {
+            const students = getStudents();
+            if (students.length === 0) {
+                alert("Hakuna data ya ku-export!");
+                return;
+            }
 
-        // Initial render on page load
-        renderTable();
+            let csv = "ID,Jina,Barua Pepe,Darasa,Hali\n";
+            students.forEach(s => {
+                csv += `"${s.id}","${s.name}","${s.email}","${s.studentClass}","Active"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "Ripoti_ya_Wanafunzi.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     </script>
 </body>
 </html>
