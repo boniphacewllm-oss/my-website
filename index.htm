@@ -22,7 +22,6 @@
             min-height: 100vh;
         }
 
-        /* LOGIN / REGISTER PAGE STYLING */
         #authScreen {
             display: flex;
             justify-content: center;
@@ -136,7 +135,6 @@
             background-color: #0369a1;
         }
 
-        /* MAIN APP DASHBOARD STYLING */
         #appScreen {
             display: none;
             flex-direction: row;
@@ -345,7 +343,6 @@
 </head>
 <body>
 
-    <!-- 1. AUTHENTICATION SCREEN (LOGIN & REGISTER) -->
     <div id="authScreen">
         <div class="auth-card">
             <div class="auth-header">
@@ -358,7 +355,6 @@
                 <button class="tab-btn" onclick="switchAuthTab('register')">Sajili (Register)</button>
             </div>
 
-            <!-- LOGIN FORM -->
             <form id="loginForm" class="auth-form active">
                 <div class="input-group">
                     <label>Barua Pepe (Email)</label>
@@ -371,7 +367,6 @@
                 <button type="submit" class="btn-submit-auth"><i class="fa-solid fa-right-to-bracket"></i> Ingia Kwenye Mfumo</button>
             </form>
 
-            <!-- REGISTER ADMIN FORM -->
             <form id="registerForm" class="auth-form">
                 <div class="input-group">
                     <label>Jina Kamili</label>
@@ -390,7 +385,6 @@
         </div>
     </div>
 
-    <!-- 2. MAIN DASHBOARD APP SCREEN -->
     <div id="appScreen">
         <div class="sidebar">
             <div>
@@ -409,7 +403,6 @@
                 <span style="font-size:0.9rem; color:#64748b;">Database Status: <strong id="dbStatus" style="color:#d97706;">Checking Connection...</strong></span>
             </div>
 
-            <!-- Stats Overview -->
             <div class="stats-grid">
                 <div class="card">
                     <div class="card-info">
@@ -434,7 +427,6 @@
                 </div>
             </div>
 
-            <!-- Add / Edit Form -->
             <div class="content-box">
                 <h3 id="formTitle">Sajili Mwanafunzi Mpya</h3>
                 <form id="studentForm" style="margin-top: 15px;">
@@ -457,7 +449,6 @@
                 </form>
             </div>
 
-            <!-- Student Directory & Download Report -->
             <div class="content-box">
                 <div class="content-box-header">
                     <h3>Orodha ya Wanafunzi</h3>
@@ -486,9 +477,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
     <script>
-        /* --- SUPABASE DATABASE CONFIGURATION --- */
         const SUPABASE_URL = "https://qcexgzkilhmdstzjsodt.supabase.co"; 
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjZXhnemtpbGhtZHN0empzb2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1MDY5ODMsImV4cCI6MjEwMjA4Mjk4M30.g-qoy7pT12qtlwfXNbC88GkANit4sBpCBqSKpUzZoOI"; 
         
@@ -499,7 +488,6 @@
             document.getElementById('dbStatus').style.color = "#16a34a";
         }
 
-        /* --- AUTH TAB SWITCHER --- */
         function switchAuthTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
@@ -513,7 +501,6 @@
             }
         }
 
-        /* --- ADMIN REGISTER LOGIC --- */
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('regName').value.trim();
@@ -523,20 +510,19 @@
             let admins = JSON.parse(localStorage.getItem('sms_admins') || '[]');
             
             if (admins.find(a => a.email === email)) {
-                alert("Barua pepe hii tayari imeshasajiliwa! Tumia email nyingine au ingia (login).");
+                alert("Barua pepe hii tayari imeshasajiliwa!");
                 return;
             }
 
             admins.push({ name, email, password });
             localStorage.setItem('sms_admins', JSON.stringify(admins));
 
-            alert("Akaunti ya Admin imetengenezwa kikamilifu! Sasa unaweza kuingia.");
+            alert("Akaunti ya Admin imetengenezwa kikamilifu!");
             switchAuthTab('login');
             document.getElementById('loginEmail').value = email;
             document.getElementById('registerForm').reset();
         });
 
-        /* --- ADMIN LOGIN LOGIC --- */
         const authScreen = document.getElementById('authScreen');
         const appScreen = document.getElementById('appScreen');
 
@@ -560,15 +546,16 @@
                 sessionStorage.setItem('currentAdminName', adminName);
                 showDashboard(adminName);
             } else {
-                alert("Password au Email siyo sahihi!\n\nIkiwa bado hujasajiliwa, bonyeza tab ya 'Sajili (Register)' ili utengeneze akaunti mpya ya Admin.");
+                alert("Password au Email siyo sahihi!");
             }
         });
 
-        function showDashboard(name) {
+        async function showDashboard(name) {
             authScreen.style.display = 'none';
             appScreen.style.display = 'flex';
             document.getElementById('currentAdminName').textContent = name;
-            renderTable();
+            const students = await getStudents();
+            renderTable(students);
         }
 
         function logout() {
@@ -578,11 +565,16 @@
             appScreen.style.display = 'none';
         }
 
-        /* --- STUDENT CRUD & DATABASE LOGIC --- */
         async function getStudents() {
             if (supabaseClient) {
-                const { data, error } = await supabaseClient.from('students').select('*');
-                if (!error && data) return data;
+                try {
+                    const { data, error } = await supabaseClient.from('students').select('*');
+                    if (!error && data && data.length > 0) {
+                        return data;
+                    }
+                } catch (e) {
+                    console.error("Supabase Error:", e);
+                }
             }
             const stored = localStorage.getItem('sms_students');
             return stored ? JSON.parse(stored) : [];
@@ -590,23 +582,24 @@
 
         async function saveStudents(students, newStudent = null, isDeleteId = null) {
             localStorage.setItem('sms_students', JSON.stringify(students));
+            renderTable(students);
 
             if (supabaseClient) {
                 if (newStudent) {
-                    await supabaseClient.from('students').upsert([newStudent]);
+                    const { error } = await supabaseClient.from('students').upsert([newStudent]);
+                    if (error) console.error("Supabase error:", error.message);
                 } else if (isDeleteId) {
-                    await supabaseClient.from('students').delete().eq('id', isDeleteId);
+                    const { error } = await supabaseClient.from('students').delete().eq('id', isDeleteId);
+                    if (error) console.error("Supabase error:", error.message);
                 }
             }
-            renderTable();
         }
 
-        async function renderTable(data = null) {
-            const students = data || await getStudents();
+        function renderTable(students = []) {
             const tableBody = document.getElementById('studentTableBody');
             tableBody.innerHTML = '';
 
-            if (students.length === 0) {
+            if (!students || students.length === 0) {
                 tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px;">Hakuna kumbukumbu za wanafunzi.</td></tr>`;
             } else {
                 students.forEach(s => {
@@ -628,7 +621,7 @@
             updateStats(students);
         }
 
-        function updateStats(students) {
+        function updateStats(students = []) {
             document.getElementById('totalStudents').textContent = students.length;
             document.getElementById('juniorStudents').textContent = students.filter(s => s.studentClass === 'Form 1' || s.studentClass === 'Form 2').length;
             document.getElementById('seniorStudents').textContent = students.filter(s => s.studentClass === 'Form 3' || s.studentClass === 'Form 4').length;
@@ -650,7 +643,7 @@
                 students.push(updatedStudent);
             }
 
-            saveStudents(students, updatedStudent);
+            await saveStudents(students, updatedStudent);
             resetForm();
         });
 
@@ -671,7 +664,7 @@
             if (confirm(`Je, una uhakika unataka kumfuta mwanafunzi #${id}?`)) {
                 let students = await getStudents();
                 students = students.filter(s => s.id !== id);
-                saveStudents(students, null, id);
+                await saveStudents(students, null, id);
             }
         }
 
@@ -693,7 +686,6 @@
             renderTable(filtered);
         }
 
-        /* --- EXPORT TO CSV --- */
         async function exportToCSV() {
             const students = await getStudents();
             if (students.length === 0) {
