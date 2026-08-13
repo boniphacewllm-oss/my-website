@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mfumo wa Booking ya Huduma</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --border: #e2e8f0;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #d97706;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+        }
+
+        nav button {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        nav button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            background-color: #fff;
+        }
+
+        input:focus, select:focus {
+            outline: 2px solid var(--primary);
+            border-color: transparent;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-success { background-color: var(--success); }
+        .btn-danger { background-color: var(--danger); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .badge-pending { background-color: #fef3c7; color: var(--warning); }
+        .badge-approved { background-color: #dcfce7; color: var(--success); }
+        .badge-cancelled { background-color: #fee2e2; color: var(--danger); }
+
+        .hidden { display: none !important; }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: none;
+            font-weight: 600;
+        }
+
+        .alert-success { background-color: #dcfce7; color: var(--success); border: 1px solid #bbf7d0; }
+        .alert-error { background-color: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
+
+        .error-msg {
+            color: var(--danger);
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>📅 Mfumo wa Booking ya Huduma</h1>
+        <nav>
+            <button id="navBtn" onclick="toggleView()">Ingia Admin</button>
+        </nav>
+    </header>
+
+    <div class="container">
+
+        <!-- ================= MTEJA SECTION ================= -->
+        <div id="clientSection">
+            <div class="card">
+                <h2>Weka Miadi / Hifadhi Huduma</h2>
+                <div id="bookingAlert" class="alert"></div>
+
+                <form id="bookingForm" onsubmit="handleBooking(event)" novalidate>
+                    <div class="grid">
+                        <div class="form-group">
+                            <label for="clientName">Jina Buani / Kamili:</label>
+                            <input type="text" id="clientName" required placeholder="Mf. Juma Hamisi">
+                            <span id="nameError" class="error-msg">Tafadhali weka jina halisi (herufi tu, hakuna namba).</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="clientPhone">Namba ya Simu:</label>
+                            <input type="tel" id="clientPhone" maxlength="10" required placeholder="07XXXXXXXX au 06XXXXXXXX">
+                            <span id="phoneError" class="error-msg">Weka namba sahihi ya simu (Tarakimu 10 kuanzia 07 au 06).</span>
+                        </div>
+                    </div>
+
+                    <div class="grid">
+                        <div class="form-group">
+                            <label for="serviceType">Chagua Huduma / Ukumbi:</label>
+                            <select id="serviceType" required onchange="updatePrice()">
+                                <option value="" data-price="0">-- Chagua Huduma --</option>
+                                <option value="Ukumbi wa Mikutano" data-price="150000">Ukumbi wa Mikutano (TSH 150,000)</option>
+                                <option value="Ukumbi wa Harusi" data-price="500000">Ukumbi wa Harusi (TSH 500,000)</option>
+                                <option value="Ushauri wa Kisheria" data-price="50000">Ushauri wa Kisheria (TSH 50,000)</option>
+                                <option value="Huduma ya Saluni / VIP" data-price="30000">Huduma ya Saluni / VIP (TSH 30,000)</option>
+                            </select>
+                            <span id="serviceError" class="error-msg">Tafadhali chagua huduma.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookingDate">Tarehe:</label>
+                            <input type="date" id="bookingDate" required>
+                            <span id="dateError" class="error-msg">Tafadhali chagua tarehe.</span>
+                        </div>
+                    </div>
+
+                    <div class="grid">
+                        <div class="form-group">
+                            <label for="bookingTime">Muda Unaoingia:</label>
+                            <select id="bookingTime" required>
+                                <option value="">-- Chagua Muda --</option>
+                                <option value="09:00 AM - 11:00 AM">09:00 AM - 11:00 AM</option>
+                                <option value="11:30 AM - 01:30 PM">11:30 AM - 01:30 PM</option>
+                                <option value="02:00 PM - 04:00 PM">02:00 PM - 04:00 PM</option>
+                                <option value="04:30 PM - 06:30 PM">04:30 PM - 06:30 PM</option>
+                                <option value="07:00 PM - 10:00 PM">07:00 PM - 10:00 PM</option>
+                            </select>
+                            <span id="timeError" class="error-msg">Tafadhali chagua muda.</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Gharama:</label>
+                            <input type="text" id="servicePrice" readonly placeholder="TSH 0" style="background: #f1f5f9; font-weight: bold;">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn">Thibitisha na Weka Booking</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ================= ADMIN SECTION ================= -->
+        <div id="adminSection" class="hidden">
+            <!-- Form ya kuingia (Password) -->
+            <div id="adminLoginForm" class="card" style="max-width: 400px; margin: 2rem auto;">
+                <h2>Ingia kama Admin</h2>
+                <div id="loginError" class="alert alert-error"></div>
+                <form onsubmit="handleAdminLogin(event)">
+                    <div class="form-group">
+                        <label for="adminPassword">Password ya Admin:</label>
+                        <input type="password" id="adminPassword" placeholder="Weka password" required>
+                    </div>
+                    <button type="submit" class="btn">Ingia Dashboard</button>
+                </form>
+            </div>
+
+            <!-- Dashboard ya Admin (Itaonekana TU baada ya kuingiza Password Sahihi) -->
+            <div id="adminDashboard" class="hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2>Dashboard ya Admin</h2>
+                    <button class="btn btn-danger" style="width: auto; padding: 0.4rem 1rem;" onclick="logoutAdmin()">Toka (Logout)</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <p>Jumla ya Booking</p>
+                        <h3 id="totalBookings">0</h3>
+                    </div>
+                    <div class="stat-card">
+                        <p>Zilizo-Approve</p>
+                        <h3 id="approvedBookings" style="color: var(--success)">0</h3>
+                    </div>
+                    <div class="stat-card">
+                        <p>Mapato Yaliyokadiriwa</p>
+                        <h3 id="totalRevenue" style="color: var(--primary)">TSH 0</h3>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Orodha ya Booking Zote</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Mteja</th>
+                                    <th>Simu</th>
+                                    <th>Huduma</th>
+                                    <th>Tarehe na Muda</th>
+                                    <th>Bei</th>
+                                    <th>Hali (Status)</th>
+                                    <th>Vitendo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bookingTableBody">
+                                <!-- Data za booking zitaingia hapa -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Set Minimum Date to Today
+        document.getElementById('bookingDate').min = new Date().toISOString().split('T')[0];
+
+        // State Variables
+        let bookings = JSON.parse(localStorage.getItem('app_bookings')) || [];
+        let isAdminLoggedIn = false;
+
+        function saveBookings() {
+            localStorage.setItem('app_bookings', JSON.stringify(bookings));
+        }
+
+        // Toggle View
+        function toggleView() {
+            const clientSec = document.getElementById('clientSection');
+            const adminSec = document.getElementById('adminSection');
+            const navBtn = document.getElementById('navBtn');
+
+            if (adminSec.classList.contains('hidden')) {
+                clientSec.classList.add('hidden');
+                adminSec.classList.remove('hidden');
+
+                if (isAdminLoggedIn) {
+                    document.getElementById('adminLoginForm').classList.add('hidden');
+                    document.getElementById('adminDashboard').classList.remove('hidden');
+                    renderAdminDashboard();
+                    navBtn.innerText = "Rudi Booking";
+                } else {
+                    document.getElementById('adminLoginForm').classList.remove('hidden');
+                    document.getElementById('adminDashboard').classList.add('hidden');
+                    navBtn.innerText = "Rudi Booking";
+                }
+            } else {
+                clientSec.classList.remove('hidden');
+                adminSec.classList.add('hidden');
+                navBtn.innerText = "Ingia Admin";
+            }
+        }
+
+        // Auto Price Update
+        function updatePrice() {
+            const select = document.getElementById('serviceType');
+            const selectedOption = select.options[select.selectedIndex];
+            const price = selectedOption.getAttribute('data-price') || 0;
+            document.getElementById('servicePrice').value = "TSH " + Number(price).toLocaleString();
+        }
+
+        // Handle Booking Validation & Submission
+        function handleBooking(e) {
+            e.preventDefault();
+
+            // Reset Errors
+            document.querySelectorAll('.error-msg').forEach(span => span.style.display = 'none');
+            document.getElementById('bookingAlert').style.display = 'none';
+
+            const name = document.getElementById('clientName').value.trim();
+            const phone = document.getElementById('clientPhone').value.trim();
+            const serviceSelect = document.getElementById('serviceType');
+            const service = serviceSelect.value;
+            const price = Number(serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price'));
+            const date = document.getElementById('bookingDate').value;
+            const time = document.getElementById('bookingTime').value;
+
+            let isValid = true;
+
+            // 1. Validate Name: Herufi tu na nafasi (No numbers/special chars)
+            const nameRegex = /^[A-Za-z\s]+$/;
+            if (!name || !nameRegex.test(name) || name.length < 3) {
+                document.getElementById('nameError').style.display = 'block';
+                isValid = false;
+            }
+
+            // 2. Validate Phone: Namba za TZ (Tarakimu 10 zinazoanza na 06 au 07)
+            const phoneRegex = /^(06|07)\d{8}$/;
+            if (!phone || !phoneRegex.test(phone)) {
+                document.getElementById('phoneError').style.display = 'block';
+                isValid = false;
+            }
+
+            // 3. Validate Select Fields
+            if (!service) {
+                document.getElementById('serviceError').style.display = 'block';
+                isValid = false;
+            }
+            if (!date) {
+                document.getElementById('dateError').style.display = 'block';
+                isValid = false;
+            }
+            if (!time) {
+                document.getElementById('timeError').style.display = 'block';
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Check Slot Conflict
+            const isConflict = bookings.some(b => 
+                b.service === service && 
+                b.date === date && 
+                b.time === time && 
+                b.status !== 'Cancelled'
+            );
+
+            const alertBox = document.getElementById('bookingAlert');
+
+            if (isConflict) {
+                alertBox.className = "alert alert-error";
+                alertBox.innerText = "⚠️ Samahani! Ukumbi/Muda huu uliouchagua tayari umechukuliwa na mteja mwingine. Chagua muda mwingine.";
+                alertBox.style.display = "block";
+                return;
+            }
+
+            // Create Booking
+            const newBooking = {
+                id: Date.now(),
+                name,
+                phone,
+                service,
+                price,
+                date,
+                time,
+                status: 'Pending'
+            };
+
+            bookings.push(newBooking);
+            saveBookings();
+
+            alertBox.className = "alert alert-success";
+            alertBox.innerText = "✅ Booking yako imethibitishwa na imewekwa kikamilifu!";
+            alertBox.style.display = "block";
+
+            document.getElementById('bookingForm').reset();
+            document.getElementById('servicePrice').value = "TSH 0";
+
+            if (isAdminLoggedIn) renderAdminDashboard();
+        }
+
+        // Handle Admin Login Security
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const pass = document.getElementById('adminPassword').value;
+            const loginError = document.getElementById('loginError');
+
+            // Password ya Admin ni 'admin123'
+            if (pass === "admin123") {
+                isAdminLoggedIn = true;
+                loginError.style.display = 'none';
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('adminLoginForm').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                renderAdminDashboard();
+            } else {
+                loginError.innerText = "❌ Nenosiri (Password) si sahihi!";
+                loginError.style.display = 'block';
+            }
+        }
+
+        // Admin Logout
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('adminLoginForm').classList.remove('hidden');
+        }
+
+        // Render Admin Dashboard Data
+        function renderAdminDashboard() {
+            if (!isAdminLoggedIn) return; // Ulinzi: Usirender data kama si admin
+
+            const tbody = document.getElementById('bookingTableBody');
+            tbody.innerHTML = "";
+
+            let totalApprovedRevenue = 0;
+            let approvedCount = 0;
+
+            if (bookings.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: #64748b;">Hakuna booking yoyote iliyowekwa bado.</td></tr>`;
+            } else {
+                bookings.forEach((b, index) => {
+                    if (b.status === 'Approved') {
+                        totalApprovedRevenue += b.price;
+                        approvedCount++;
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td><b>${b.name}</b></td>
+                        <td>${b.phone}</td>
+                        <td>${b.service}</td>
+                        <td>${b.date}<br><small>${b.time}</small></td>
+                        <td>TSH ${b.price.toLocaleString()}</td>
+                        <td><span class="badge badge-${b.status.toLowerCase()}">${b.status}</span></td>
+                        <td>
+                            ${b.status !== 'Approved' ? `<button class="btn btn-success" style="padding: 2px 8px; font-size: 0.8rem; width: auto;" onclick="updateStatus(${b.id}, 'Approved')">Approve</button>` : ''}
+                            ${b.status !== 'Cancelled' ? `<button class="btn btn-danger" style="padding: 2px 8px; font-size: 0.8rem; width: auto;" onclick="updateStatus(${b.id}, 'Cancelled')">Kaa</button>` : ''}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('totalBookings').innerText = bookings.length;
+            document.getElementById('approvedBookings').innerText = approvedCount;
+            document.getElementById('totalRevenue').innerText = "TSH " + totalApprovedRevenue.toLocaleString();
+        }
+
+        // Update Status
+        function updateStatus(id, newStatus) {
+            bookings = bookings.map(b => b.id === id ? { ...b, status: newStatus } : b);
+            saveBookings();
+            renderAdminDashboard();
+        }
+    </script>
+</body>
+</html>
